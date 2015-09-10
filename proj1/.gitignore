@@ -1,2 +1,4 @@
 *.out
-tetra-3.nff
+*.ppm
+*.png
+*.nff
