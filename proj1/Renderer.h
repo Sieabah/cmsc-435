@@ -15,6 +15,8 @@
 #include <vector>
 #include <iostream>
 
+#define PI 3.14159265
+
 /**
  * Shader struct
  * Holds basic shader information
@@ -95,6 +97,43 @@ public:
     Vector3D d(){ return s() - eye(); }
 
     Vector3D p(double t){ return eye() + (d() * t); }
+
+    Vector3D coordsFromCamera(const Vector3D &other)
+    {
+
+    }
+
+    double projectionFromCenter()
+    {
+        double lensHalfAngle = angle/2;
+        double deg = PI/180;
+
+        return (d().magnitude() * sin(lensHalfAngle*deg))/sin((90-lensHalfAngle)*deg);
+    }
+
+    Vector3D l(double u=0)
+    {
+        double sideLength = projectionFromCenter();
+        return Vector3D(lookAt+Vector3D(-sideLength,0,0));
+    }
+
+    Vector3D r(double u=0)
+    {
+        double sideLength = projectionFromCenter();
+        return Vector3D(lookAt+Vector3D(sideLength,0,0));
+    }
+
+    Vector3D t(double u=0)
+    {
+        double sideLength = projectionFromCenter();
+        return Vector3D(lookAt+Vector3D(0,sideLength,0));
+    }
+
+    Vector3D b(double u=0)
+    {
+        double sideLength = projectionFromCenter();
+        return Vector3D(lookAt+Vector3D(0,-sideLength,0));
+    }
 
 private:
 

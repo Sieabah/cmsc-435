@@ -48,9 +48,21 @@ int main(int argc, char *argv[]) {
 
     Renderer* camera = world.getRenderer();
     cout << "e: " << camera->eye() << endl;
+    cout << "s: " << camera->s() << endl;
     cout << "d: " << camera->d() << endl;
 
     cout << "p(0): " << camera->p(0) << endl;
     cout << "p(1): " << camera->p(1) << endl;
+
+    cout << endl;
+
+    cout << "Render plane information" << endl;
+    cout << "projection length: " << camera->projectionFromCenter() << endl;
+
+    cout << "top side: " << camera->t() << endl;
+    cout << "right side: " << camera->r() << endl;
+    cout << "bottom side: " << camera->b() << endl;
+    cout << "left side: " << camera->l() << endl;
+
     return 0;
 }

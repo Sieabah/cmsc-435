@@ -25,6 +25,11 @@ public:
     {
         vertices.push_back(coord);
     }
+
+    bool intersects(Vector3D ray)
+    {
+        return false;
+    }
 private:
     std::vector<Vector3D> vertices;
 };
