@@ -15,7 +15,7 @@
 #include <vector>
 #include <iostream>
 
-#define PI 3.14159265
+#define PI 3.14159265358979323846
 
 /**
  * Shader struct
@@ -34,7 +34,7 @@ public:
     //Default Constructor
     Renderer()
     : position(Vector3D()), lookAt(Vector3D()), upVector(Vector3D()),
-      angle(0), hither(0), resX(640),resY(480),
+      fov(0), hither(0), resX(640),resY(480),
       background_color(Vector3D(0,0,0)), fill_color(Vector3D(255,0,0)){};
 
     /**
@@ -49,14 +49,14 @@ public:
     void LookVec(Vector3D coord) { lookAt = coord; };
     /**
      * UpVec
-     * Update up vecotr
+     * Update up vector
      */
     void UpVec(Vector3D coord) { upVector = coord; };
     /**
      * Angle
-     * Update camera angle
+     * Update camera fov
      */
-    void Angle(double value) { angle = value; };
+    void Angle(double value) { fov = value; };
     /**
      * Hither
      * Update camera hither
@@ -66,7 +66,7 @@ public:
      * Resolution
      * Update camera resolution
      */
-    void Resolution(int x, int y) { resX = x; resY = y; };
+    void Resolution(unsigned int x, unsigned int y) { resX = x; resY = y; };
 
     /**
      * Background
@@ -84,6 +84,13 @@ public:
      */
     void Shader(Shading new_shader){ shader = new_shader; };
 
+    double FoV(){ return fov; }
+    unsigned int width(){ return resX; }
+    unsigned int height(){ return resY; }
+
+    Vector3D foreground(){ return fill_color; }
+    Vector3D background(){ return background_color; }
+
     /**
      * PrintRenderInformation
      * Prints basic render information
@@ -98,42 +105,20 @@ public:
 
     Vector3D p(double t){ return eye() + (d() * t); }
 
-    Vector3D coordsFromCamera(const Vector3D &other)
+    Vector3D up()
     {
-
+        return upVector;
     }
 
     double projectionFromCenter()
     {
-        double lensHalfAngle = angle/2;
+        double lensHalfAngle = fov /2;
         double deg = PI/180;
 
-        return (d().magnitude() * sin(lensHalfAngle*deg))/sin((90-lensHalfAngle)*deg);
-    }
+        return (d().magnitude() * sinf((float) (lensHalfAngle*deg)))/sinf((float) ((90-lensHalfAngle)*deg));
+    };
 
-    Vector3D l(double u=0)
-    {
-        double sideLength = projectionFromCenter();
-        return Vector3D(lookAt+Vector3D(-sideLength,0,0));
-    }
-
-    Vector3D r(double u=0)
-    {
-        double sideLength = projectionFromCenter();
-        return Vector3D(lookAt+Vector3D(sideLength,0,0));
-    }
-
-    Vector3D t(double u=0)
-    {
-        double sideLength = projectionFromCenter();
-        return Vector3D(lookAt+Vector3D(0,sideLength,0));
-    }
-
-    Vector3D b(double u=0)
-    {
-        double sideLength = projectionFromCenter();
-        return Vector3D(lookAt+Vector3D(0,-sideLength,0));
-    }
+    void Render(std::string outputFile, std::vector<Polygon>* polys, bool printout=false);
 
 private:
 
@@ -146,13 +131,12 @@ private:
     Vector3D position;
     Vector3D lookAt;
     Vector3D upVector;
-    double angle;
+    double fov;
     double hither;
 
     //Resolution
-    int resX;
-    int resY;
-
+    unsigned int resX;
+    unsigned int resY;
 };
 
 

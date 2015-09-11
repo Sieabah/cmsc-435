@@ -91,7 +91,7 @@ World World::GenerateWorldFromNFF(std::string filepath)
                                 world.getRenderer()->Position(Vector3D(R,G,B));
                                 break;
 
-                            //Look at vector & angle
+                            //Look at vector & fov
                             case 'a':
                                 //aT
                                 if(tmp[1] == 't')
@@ -104,7 +104,7 @@ World World::GenerateWorldFromNFF(std::string filepath)
                                 else
                                 {
                                     parameter >> R;
-                                    //Update angle
+                                    //Update fov
                                     world.getRenderer()->Angle(R);
                                 }
                                 break;
@@ -129,7 +129,7 @@ World World::GenerateWorldFromNFF(std::string filepath)
                                 parameter >> R; parameter >> G;
 
                                 //Update resolution
-                                world.getRenderer()->Resolution((int)R, (int)G);
+                                world.getRenderer()->Resolution((unsigned int)R, (unsigned int)G);
                                 break;
 
                             //Unknown case

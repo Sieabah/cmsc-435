@@ -11,13 +11,16 @@
 #include "World.h"
 
 #include <string>
+#include <vector>
+
 #include <sys/stat.h>
+#include <stdio.h>
 
 
 using namespace std;
 
 /**
- * Checks for file existance
+ * Checks for file existence
  */
 inline bool file_exits(const string& name)
 {
@@ -27,42 +30,23 @@ inline bool file_exits(const string& name)
 
 int main(int argc, char *argv[]) {
     //Check for amount of arguments
-    if(argc < 2)
+    if(argc < 3)
     {
-        cout << "Please specify the file to display: <program> <filepath>" << endl;
+        cout << "Please specify the file to display: <program> <nff file> <output file>" << endl;
         return 1;
     }
     //Check if file actually exists
     else if(!file_exits(argv[1]))
     {
-        cout << "Please give a valid file" << endl;
+        cout << "Please give a valid input file" << endl;
         return 1;
     }
 
     //Create world from NFF file
     World world = World::GenerateWorldFromNFF(string(argv[1]));
 
-    world.PrintWorldInformation();
+    //world.Render(argv[2],world);
 
-    cout << endl;
-
-    Renderer* camera = world.getRenderer();
-    cout << "e: " << camera->eye() << endl;
-    cout << "s: " << camera->s() << endl;
-    cout << "d: " << camera->d() << endl;
-
-    cout << "p(0): " << camera->p(0) << endl;
-    cout << "p(1): " << camera->p(1) << endl;
-
-    cout << endl;
-
-    cout << "Render plane information" << endl;
-    cout << "projection length: " << camera->projectionFromCenter() << endl;
-
-    cout << "top side: " << camera->t() << endl;
-    cout << "right side: " << camera->r() << endl;
-    cout << "bottom side: " << camera->b() << endl;
-    cout << "left side: " << camera->l() << endl;
 
     return 0;
 }

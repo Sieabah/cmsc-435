@@ -19,13 +19,13 @@
 class World {
 public:
     //Default constructor
-    World(): renderer(Renderer()){};
+    World(): camera(Renderer()){};
 
     /**
      * getRenderer
      * Returns pointer to renderer
      */
-    Renderer* getRenderer(){ return &renderer; }
+    Renderer* getRenderer(){ return &camera; }
 
     /**
      * AddPoly
@@ -45,9 +45,15 @@ public:
      */
     static World GenerateWorldFromNFF(std::string filepath);
 
+    /*void Render(std::string outputFile, World world, bool printout=false)
+    {
+        renderer.Render(outputFile, world, printout);
+    }*/
+
+    std::vector<Polygon>* Polys(){ return &polygons; }
 private:
     std::vector<Polygon> polygons;
-    Renderer renderer;
+    Renderer camera;
 };
 
 

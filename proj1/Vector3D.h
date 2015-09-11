@@ -53,6 +53,16 @@ public:
         return vec.x*oth.x + vec.y*oth.y + vec.z*oth.z;
     }
 
+    static Vector3D cross(const Vector3D &vec, const Vector3D &oth)
+    {
+        return Vector3D(vec.y*oth.z-vec.z*oth.y, vec.z*oth.x-vec.x*oth.z,vec.x*oth.y - vec.y*oth.x);
+    }
+
+    float angle(const Vector3D &oth)
+    {
+        return acosf((float)((*this*oth)/this->magnitude() / oth.magnitude()));
+    }
+
     //Length of a vector
     double magnitude() const
     {
