@@ -18,8 +18,9 @@ class Vector3D {
 public:
     //Default constructor
     Vector3D(double x = 0.0, double y = 0.0, double z = 0.0);
-    Vector3D(const Vector3D &other)
-    : x(other.x), y(other.y), z(other.z){}
+
+    //Copy Constructor
+    Vector3D(const Vector3D &other);
 
     //Vector values
     double x;
@@ -31,52 +32,42 @@ public:
     Vector3D operator-(const Vector3D &other);
     Vector3D operator*(const double &other);
     Vector3D operator*(const int &other);
-
-    double operator*(const Vector3D &other)
-    {
-        return Vector3D::dot(*this, other);
-    }
-
-    double operator^(int value)
-    {
-        if(value != 2)
-            throw "Cannot raise vector to power given";
-
-        return Vector3D::dot(*this, *this);
-    }
-
+    double operator*(const Vector3D &other);
+    double operator^(int value);
     bool operator==(const Vector3D &other);
     bool operator<(const Vector3D &other);
 
-    static double dot(const Vector3D &vec, const Vector3D &oth)
-    {
-        return vec.x*oth.x + vec.y*oth.y + vec.z*oth.z;
-    }
+    /**
+     * dot
+     * Perform dot product on two given vectors
+     */
+    static double dot(const Vector3D &vec, const Vector3D &oth);
 
-    static Vector3D cross(const Vector3D &vec, const Vector3D &oth)
-    {
-        return Vector3D(vec.y*oth.z-vec.z*oth.y, vec.z*oth.x-vec.x*oth.z,vec.x*oth.y - vec.y*oth.x);
-    }
+    /**
+     * cross
+     * Perform cross product on two given vectors
+     */
+    static Vector3D cross(const Vector3D &vec, const Vector3D &oth);
 
-    float angle(const Vector3D &oth)
-    {
-        return acosf((float)((*this*oth)/this->magnitude() / oth.magnitude()));
-    }
+    /**
+     * angle
+     * Determine angle between two vectors
+     */
+    float angle(const Vector3D &oth);
 
-    //Length of a vector
-    double magnitude() const
-    {
-        return sqrt(pow(x,2) + pow(y,2) + pow(z,2));
-    }
+    /**
+     * magnitude
+     * Find length/magnitude of the vector
+     */
+    double magnitude() const;
 
-    //Magnitude is 1
-    Vector3D unit()
-    {
-        double mag = magnitude();
-        return Vector3D(x/mag, y/mag, z/mag);
-    }
+    /**
+     * unit
+     * Normalize the vector
+     */
+    Vector3D unit();
 
-    //Printable interface
+    //Printable interface (I can't get this working with it being in the header)
     friend std::ostream& operator<<(std::ostream& os, const Vector3D& vec)
     {
         os << vec.x << ',' << vec.y << ',' << vec.z;

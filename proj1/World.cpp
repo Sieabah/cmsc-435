@@ -14,6 +14,12 @@
 #include <iostream>
 
 /**
+ * World()
+ * Default constructor
+ */
+World::World() : camera(Renderer()) {}
+
+/**
  * PrintWorldInformation
  * Prints basic world information and renderer information
  */
@@ -195,4 +201,41 @@ World World::GenerateWorldFromNFF(std::string filepath)
 
     //Return generated world
     return world;
+}
+
+/**
+ * Polys
+ * Return point to polygon vector
+ */
+std::vector<Polygon> *World::Polys()
+{
+    return &polygons;
+}
+
+/**
+ * Render
+ * Pass the variable to the camera render
+ */
+void World::Render(std::string outputFile, bool printout) {
+    //Sorry didn't have time to implement this
+    printout = false;
+    camera.Render(outputFile, Polys(), printout);
+}
+
+/**
+ * AddPoly
+ * Add polygon to vector
+ */
+void World::AddPoly(const Polygon &poly)
+{
+    polygons.push_back(poly);
+}
+
+/**
+ * getRenderer
+ * Returns pointer to renderer
+ */
+Renderer *World::getRenderer()
+{
+    return &camera;
 }

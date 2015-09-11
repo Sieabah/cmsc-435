@@ -7,15 +7,9 @@
  * This project demonstrates basic ray tracing
  */
 
-#include <iostream>
 #include "World.h"
-
-#include <string>
-#include <vector>
-
 #include <sys/stat.h>
-#include <stdio.h>
-
+#include <iostream>
 
 using namespace std;
 
@@ -45,8 +39,8 @@ int main(int argc, char *argv[]) {
     //Create world from NFF file
     World world = World::GenerateWorldFromNFF(string(argv[1]));
 
+    //Render the world
     world.Render(argv[2]);
-
 
     return 0;
 }

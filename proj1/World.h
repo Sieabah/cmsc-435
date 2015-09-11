@@ -19,19 +19,18 @@
 class World {
 public:
     //Default constructor
-    World(): camera(Renderer()){};
+    World();
 
     /**
-     * getRenderer
-     * Returns pointer to renderer
+     * Return pointer to renderer
      */
-    Renderer* getRenderer(){ return &camera; }
+    Renderer * getRenderer();
 
     /**
      * AddPoly
-     * Adds polygon to world
+     * Add polygon to world
      */
-    void AddPoly(const Polygon &poly){ polygons.push_back(poly); }
+    void AddPoly(const Polygon &poly);
 
     /**
      * PrintWorldInformation
@@ -45,16 +44,21 @@ public:
      */
     static World GenerateWorldFromNFF(std::string filepath);
 
-    void Render(std::string outputFile, bool printout=false)
-    {
-        //Sorry didn't have time to implement this
-        printout = false;
-        camera.Render(outputFile, Polys(), printout);
-    }
+    /**
+     * Render
+     * outputFile - filename to write to
+     */
+    void Render(std::string outputFile, bool printout=false);
 
-    std::vector<Polygon>* Polys(){ return &polygons; }
+    /**
+     * Polys
+     * Return pointer to polygons vector
+     */
+    std::vector<Polygon> * Polys();
 private:
+    //Polygons in world
     std::vector<Polygon> polygons;
+    //Camera
     Renderer camera;
 };
 
