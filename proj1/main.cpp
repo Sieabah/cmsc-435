@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
     //Check for amount of arguments
     if(argc < 3)
     {
-        cout << "Please specify the file to display: <program> <nff file> <output file>" << endl;
+        cout << "usage: <program> input.nff output.ppm" << endl;
         return 1;
     }
     //Check if file actually exists
@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
     //Create world from NFF file
     World world = World::GenerateWorldFromNFF(string(argv[1]));
 
-    //world.Render(argv[2],world);
+    world.Render(argv[2]);
 
 
     return 0;

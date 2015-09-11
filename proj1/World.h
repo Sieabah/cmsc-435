@@ -45,10 +45,12 @@ public:
      */
     static World GenerateWorldFromNFF(std::string filepath);
 
-    /*void Render(std::string outputFile, World world, bool printout=false)
+    void Render(std::string outputFile, bool printout=false)
     {
-        renderer.Render(outputFile, world, printout);
-    }*/
+        //Sorry didn't have time to implement this
+        printout = false;
+        camera.Render(outputFile, Polys(), printout);
+    }
 
     std::vector<Polygon>* Polys(){ return &polygons; }
 private:
