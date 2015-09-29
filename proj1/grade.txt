@@ -1,0 +1,45 @@
+  +--------------------------------------------------------+
+  |__0   10%         README comment or file                |
+  |      __0    1%   Submitted a readme file               |
+  |      __0    7%   Description of assignment             |
+  |      __0    2%   Statement of help                     |
+  +--------------------------------------------------------+
+  |_20   20%         Implementation                        |
+  |      _10   10%   Compiles and executes w/o errors      |
+  |      _10   10%   Written in C++; has vector class;     |
+  +--------------------------------------------------------+
+  |_15   15%         Input/output                          |
+  |      __5    5%   Correctly parses nff file             |
+  |      __5    5%   Outputs valid ppm image               |
+  |      __5    5%   Correct indexing in pixels array      |
+  +--------------------------------------------------------+
+  |_10   10%         Field of view                         |
+  |      __5    5%   Converts fov angle to radians         |
+  |      __5    5%   Calculates l,r,b,t correctly          |
+  +--------------------------------------------------------+
+  |_20   20%         Basis coordinate system               |
+  |      __5    5%   w=from-at or at-from                  |
+  |      __5    5%   u=up^w or w^up                        |
+  |      __5    5%   v=w^u or u^w                          |
+  |      __5    5%   all normalized                        |
+  +--------------------------------------------------------+
+  |_10   10%         Positioning rays                      |
+  |      __2    2%   u_s from i                            |
+  |      __2    2%   v_s from j                            |
+  |      __2    2%   w_s with correct sign                 |
+  |      __4    4%   d=u_s*u + v_s*v + w_s*w               |
+  +--------------------------------------------------------+
+  |_15   15%         Ray-triangle intersection             |
+  |      _10    10%  Ray-plane intersection                |
+  |      __5    5%   Inside/outside triangle test          |
+  +--------------------------------------------------------+
+  |__0   10%         (634) Concave polygons intersection   |
+  |      ___    10%  Concave polygons                 	   |
+  +--------------------------------------------------------+
+  |__0   10%         (Ex) Ray-sphere intersection          |
+  |      ___    5%   Discriminant                          |
+  |      ___    5%   First & second intersections          |
+  +--------------------------------------------------------+
+  |_90               Total (of 100/435 or 110/634)         |
+  +--------------------------------------------------------+
+  You did not submit a README file.
