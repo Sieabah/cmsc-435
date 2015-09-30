@@ -219,7 +219,7 @@ World World::GenerateWorldFromNFF(std::string filepath)
         file.close();
     }
 
-    world.PrintWorldInformation();
+    //world.PrintWorldInformation();
     //Return generated world
     return world;
 }

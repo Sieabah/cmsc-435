@@ -97,8 +97,8 @@ void Renderer::Render(std::string outputFile, const std::vector<Actor*>* actors,
     //For each row
     for(int hPixel =0; hPixel <height(); ++hPixel) {
 
-        //TODO: Print progres
-        if (hPixel % (height() / 15)  == 0) printf("%2d%% complete\n", (100* hPixel) / height()); // show current line
+        if (hPixel % (height() / 25) == 0)
+            printf("%d%%...", (100* hPixel)/height());
 
         //For each column
         for(int wPixel =0; wPixel <width(); ++wPixel) {
@@ -209,7 +209,8 @@ unsigned int Renderer::width() {
  * Return field of view
  */
 double Renderer::FoV() {
-    return fov;
+    //Offset by 10 degrees?
+    return fov+10;
 }
 
 /**
@@ -296,7 +297,7 @@ Vector3D Renderer::v() { return Vector3D::cross(w(), u()); }
 
 /**
  * d
- * Return distance to viewing pane
+ * Return distance to viewing pane/
  */
 double Renderer::dist() { return d().magnitude(); }
 
