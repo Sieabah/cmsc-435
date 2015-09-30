@@ -22,7 +22,7 @@ public:
     /**
      * Default constructor
      */
-    Hit(): length(INFINITY), actor(nullptr){};
+    Hit(): length(INFINITY), actor(NULL){};
 
     /**
      * Constructor with initializers
