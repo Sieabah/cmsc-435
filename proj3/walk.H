@@ -86,6 +86,7 @@ public:
   SlVector3 center; // point the eye is looking at
   SlVector3 up; // up direction
   float fov, nearplane, farplane; // field of view, distance to near and far clipping planes
+  int angle;
 };
 
 class Viewport {

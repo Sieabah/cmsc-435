@@ -82,40 +82,46 @@ void Object::createDisplayList() {
 }
 
 void Object::drawObject() {
-  //std::cout << "OBJECT: " << dlid << std::endl;
-
+  //Enable standard GL things
   glEnable(GL_COLOR_MATERIAL);
   glEnable(GL_NORMALIZE);
   glEnable(GL_LIGHTING);
 
+  //Save matrix
   glPushMatrix();
 
+  //Apply all transformations
   for (int i = 0; i < transforms.size(); i++)
   {
     transforms[i]->apply();
   }
 
+  //Wireframe mode
   if(wMode)
     glBegin(GL_LINES);  
   else
     glBegin(GL_TRIANGLES);
 
-	
+	//Define materials
   GLfloat ambient_color[4] = {ka*color.x(),ka*color.y(),ka*color.z(), 1.0f};
   GLfloat diffuse_color[4] = {kd*color.x(),kd*color.y(),kd*color.z(), 1.0f};
-  GLfloat specular_color[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+  GLfloat specular_color[4] = {ks*color.x(), ks*color.y(), ks*color.z(), 1.0f};
 
-
+  //Draw all triangles
   for (int i = 0; i < triangles.size(); i++)
   {
+    //Set color and material properties
     glColor3f(color.x(),color.y(),color.z());
     glMaterialfv(GL_FRONT, GL_AMBIENT, ambient_color);
     glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse_color);
     glMaterialfv(GL_FRONT, GL_SPECULAR, specular_color);
 
     glMaterialf(GL_FRONT, GL_SHININESS, ks);
+
+    //Set normals
   	glNormal3d(faceNormals[i][0],faceNormals[i][1],faceNormals[i][2]);
   	
+    //Build triangle
   	for (int j = 0; j < 3; ++j)
   	{
   		glVertex3f(vertices[triangles[i][j]][0],
@@ -124,8 +130,10 @@ void Object::drawObject() {
   	}
   }
 
+  //Complete
   glEnd();
 
+  //Restore matrix
   glPopMatrix();
 
   // here you draw the object
@@ -136,9 +144,10 @@ void Object::drawObject() {
 }
 
 void Object::computeNormals() {
-
+    //For all triangles
 	 for (int i = 0; i < triangles.size(); i++)
 	  {
+      //Compute normals
 	  	SlVector3 a = vertices[triangles[i][0]];
 	  	SlVector3 b = vertices[triangles[i][1]];
 	  	SlVector3 c = vertices[triangles[i][2]];
@@ -154,13 +163,13 @@ void Object::computeNormals() {
 }
 
 void Light::apply() {
-	//std::cout<<"Applying light "<< id <<std::endl;
-
+  //GL Light things
 	glLightfv(id,GL_AMBIENT,ambient);
 	glLightfv(id,GL_DIFFUSE,diffuse);
 	glLightfv(id,GL_SPECULAR,specular);
 	glLightfv(id,GL_POSITION,pos);
 
+  //Enable light
 	glEnable(id);
 
 	// this function tells openGL about the light
@@ -263,11 +272,14 @@ void drawClock() {
   //Draw Second Hand
   glPushMatrix();
 
+  //Scale per-clock
   glScaled(0.9,0.9,0.9);
+  //clock scale
   glScaled(scaleDown[0],scaleDown[1],scaleDown[2]);
+  //Rotation
   glRotatef(-360 * (seconds/60.0), 0,0,1.0);
 
-  
+  //Draw hand
   glBegin(GL_TRIANGLES); 
     glColor3f(0.0f, 0.0f, 1.0f);
     glVertex2f(0, 1.0f);
@@ -284,7 +296,6 @@ void drawClock() {
   glScaled(scaleDown[0],scaleDown[1],scaleDown[2]);
   glRotatef(-360 * (minutes/60.0), 0,0,1.0);
 
-  
   glBegin(GL_TRIANGLES); 
     glColor3f(0.0f, 1.0f, 0.0f);
     glVertex2f(0, 1.0f);
@@ -300,7 +311,6 @@ void drawClock() {
   glScaled(0.6,0.6,0.6);
   glScaled(scaleDown[0],scaleDown[1],scaleDown[2]);
   glRotatef(-360 * (hours/12.0), 0,0,1.0);
-
   
   glBegin(GL_TRIANGLES); 
     glColor3f(1.0f, 0.0f, 0.0f);
@@ -324,21 +334,18 @@ void myDisplay() {
   if(SMOOTH_SHADING)
     glShadeModel(GL_SMOOTH);
 
+  //Enable depth
   glEnable(GL_DEPTH_TEST);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
 
-  // This is the main display function
-  //   
-  // You want to set up the projection using gluPerspective and gluLookAt
-  //*
+  //Setup perspective
   gluPerspective(camera.fov, viewport.w/viewport.h, camera.nearplane, camera.farplane);
   gluLookAt(camera.eye.x(),camera.eye.y(),camera.eye.z(),
     camera.center.x(),camera.center.y(),camera.center.z(),
     camera.up.x(),camera.up.y(),camera.up.z());
-  //*/
-  // apply all the lights
 
+  // apply all the lights
   glMatrixMode(GL_MODELVIEW);
   for (int i = 0; i < 8 &&  i < lights.size() ; ++i)
   {
@@ -352,19 +359,19 @@ void myDisplay() {
   }
 
   // switch to 2d (gluOrtho2D) and draw the clock hands
-  //*
   glPushMatrix();
     glMatrixMode(GL_PROJECTION);      // Select the Projection matrix for operation
     glLoadIdentity();                 // Reset Projection matrix
-    gluOrtho2D(-1.0, 1.0, -1.0, 1.0);
+    gluOrtho2D(-0.2, 2.0, -0.2, 2.0);
     drawClock();
   glPopMatrix();
-  //*/
-  
+    
+  //Restore perspective view
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   gluPerspective(camera.fov, viewport.w/viewport.h, camera.nearplane, camera.farplane);
 
+  //Enable lighting and materials
   glEnable(GL_LIGHTING);
   glEnable(GL_COLOR_MATERIAL);
   // you will need to enable various GL features (like GL_LIGHTING) here
@@ -396,7 +403,28 @@ void mySpecial(int key, int x, int y) {
     camera.center += SlVector3(0.1,0.0,0.0);
 	}
 	else
-	  std::cout<<"left key pressed";
+  {
+    //Couldn't get this to actually work...
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    GLfloat mat44[16];
+
+    mat44[0] = camera.eye.x();
+    mat44[5] = camera.eye.y();
+    mat44[10] = camera.eye.z();
+    mat44[15] = 1.0f;
+
+    glLoadIdentity();
+    glMultMatrixf(mat44);
+    glRotated(-5.0,0.0,camera.eye.y(),0.0);
+
+    GLfloat resp[16];
+    glGetFloatv(GL_MODELVIEW_MATRIX, resp);
+
+    camera.eye.set(resp[0],resp[5],resp[10]);
+
+    glPopMatrix();
+  }
 	break;
   case GLUT_KEY_RIGHT:
 	if (glutGetModifiers() & GLUT_ACTIVE_SHIFT) 
@@ -406,8 +434,26 @@ void mySpecial(int key, int x, int y) {
 	}
 	else
   {
+    //Couldn't get this to actually work...
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    GLfloat mat44[16];
 
-	  std::cout<<"right key pressed";
+    mat44[0] = camera.center.x();
+    mat44[5] = camera.center.y();
+    mat44[10] = camera.center.z();
+    mat44[15] = 1.0f;
+
+    glLoadIdentity();
+    glMultMatrixf(mat44);
+    glRotated(5.0,0.0,camera.eye.y(),0.0);
+
+    GLfloat resp[16];
+    glGetFloatv(GL_MODELVIEW_MATRIX, resp);
+
+    camera.center.set(resp[0],resp[5],resp[10]);
+
+    glPopMatrix();
   }
 	break;
   default:
