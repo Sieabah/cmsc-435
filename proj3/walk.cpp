@@ -31,8 +31,6 @@ bool wMode = false;
 ///////////////////////////////////////////////////
 
 void Translate::apply() const {
-  glMatrixMode(GL_MODELVIEW);
-
   glTranslated(translation.x(),translation.y(),translation.z());
   //glPushMatrix
   // apply a translation to the OpenGL modelview matrix stack
@@ -40,16 +38,12 @@ void Translate::apply() const {
 };
 
 void Scale::apply() const {
-  glMatrixMode(GL_MODELVIEW);
-
   glScaled(scale.x(),scale.y(),scale.z());
   // apply a scale transformation to the OpenGL modelview matrix stack
   // see glScaled
 };
 
 void Rotate::apply() const {
-  glMatrixMode(GL_MODELVIEW);
-
   glRotated(angle,axis.x(),axis.y(),axis.z());
   // apply a rotation to the OpenGL modelview matrix stack
   // see glRotated
@@ -101,22 +95,27 @@ void Object::drawObject() {
     transforms[i]->apply();
   }
 
-  float colour[4] = {color.x(),color.y(),color.z(),1.0f};
-
   if(wMode)
     glBegin(GL_LINES);  
   else
     glBegin(GL_TRIANGLES);
 
-  GLfloat c[4] = {kd*(float)color.x(),kd*(float)color.y(),kd*(float)color.z(), 1.0};
+	
+  GLfloat ambient_color[4] = {ka*color.x(),ka*color.y(),ka*color.z(), 1.0f};
+  GLfloat diffuse_color[4] = {kd*color.x(),kd*color.y(),kd*color.z(), 1.0f};
+  GLfloat specular_color[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 
-  glColor3f(colour[0],colour[1],colour[2]);
-  glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, &ka);
-  glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, &kd);
-  glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, ks);
 
   for (int i = 0; i < triangles.size(); i++)
   {
+    glColor3f(color.x(),color.y(),color.z());
+    glMaterialfv(GL_FRONT, GL_AMBIENT, ambient_color);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse_color);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, specular_color);
+
+    glMaterialf(GL_FRONT, GL_SHININESS, ks);
+  	glNormal3d(faceNormals[i][0],faceNormals[i][1],faceNormals[i][2]);
+  	
   	for (int j = 0; j < 3; ++j)
   	{
   		glVertex3f(vertices[triangles[i][j]][0],
@@ -137,6 +136,16 @@ void Object::drawObject() {
 }
 
 void Object::computeNormals() {
+
+	 for (int i = 0; i < triangles.size(); i++)
+	  {
+	  	SlVector3 a = vertices[triangles[i][0]];
+	  	SlVector3 b = vertices[triangles[i][1]];
+	  	SlVector3 c = vertices[triangles[i][2]];
+	  	SlVector3 normal = cross(b - a, c - a);
+	  	faceNormals.push_back(normal);
+	  }
+
   // here you compute normals
   // you should compute both face normals (cross product) for flat shading
   // and vertex normals (area-weighted averages of face normals) for
@@ -246,12 +255,61 @@ void drawClock() {
   double minutes = ltime->tm_min + ltime->tm_sec/60.0;
   int seconds = ltime->tm_sec;
 
-  glPushMatrix();
-  glLoadIdentity();
+  float scaleDown[3] = {0.25,0.25,0.25};
+  float translateDown[3] = {-1.0,-1.0,0};
 
-  glRectf(5,5,10,10);
+  glMatrixMode(GL_MODELVIEW);
+
+  //Draw Second Hand
+  glPushMatrix();
+
+  glScaled(0.9,0.9,0.9);
+  glScaled(scaleDown[0],scaleDown[1],scaleDown[2]);
+  glRotatef(-360 * (seconds/60.0), 0,0,1.0);
+
   
-  // you still need to compute the hand directions and draw them.  
+  glBegin(GL_TRIANGLES); 
+    glColor3f(0.0f, 0.0f, 1.0f);
+    glVertex2f(0, 1.0f);
+    glVertex2f(-0.1f, 0.0f);
+    glVertex2f(0.1f, 0.0f);
+  glEnd();
+
+  glPopMatrix();
+
+  //Draw Minute Hand
+  glPushMatrix();
+
+  glScaled(0.75,0.75,0.75);
+  glScaled(scaleDown[0],scaleDown[1],scaleDown[2]);
+  glRotatef(-360 * (minutes/60.0), 0,0,1.0);
+
+  
+  glBegin(GL_TRIANGLES); 
+    glColor3f(0.0f, 1.0f, 0.0f);
+    glVertex2f(0, 1.0f);
+    glVertex2f(-0.1f, 0.0f);
+    glVertex2f(0.1f, 0.0f);
+  glEnd();
+
+  glPopMatrix();
+
+  //Draw hour hand
+  glPushMatrix();
+
+  glScaled(0.6,0.6,0.6);
+  glScaled(scaleDown[0],scaleDown[1],scaleDown[2]);
+  glRotatef(-360 * (hours/12.0), 0,0,1.0);
+
+  
+  glBegin(GL_TRIANGLES); 
+    glColor3f(1.0f, 0.0f, 0.0f);
+    glVertex2f(0, 1.0f);
+    glVertex2f(-0.1f, 0.0f);
+    glVertex2f(0.1f, 0.0f);
+  glEnd();
+
+  glPopMatrix();
 }
 
 void myReshape(int w, int h) {
@@ -266,18 +324,22 @@ void myDisplay() {
   if(SMOOTH_SHADING)
     glShadeModel(GL_SMOOTH);
 
+  glEnable(GL_DEPTH_TEST);
+  glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
 
   // This is the main display function
   //   
   // You want to set up the projection using gluPerspective and gluLookAt
+  //*
   gluPerspective(camera.fov, viewport.w/viewport.h, camera.nearplane, camera.farplane);
   gluLookAt(camera.eye.x(),camera.eye.y(),camera.eye.z(),
     camera.center.x(),camera.center.y(),camera.center.z(),
     camera.up.x(),camera.up.y(),camera.up.z());
-
+  //*/
   // apply all the lights
 
+  glMatrixMode(GL_MODELVIEW);
   for (int i = 0; i < 8 &&  i < lights.size() ; ++i)
   {
     lights[i].apply();
@@ -289,10 +351,22 @@ void myDisplay() {
     objects[i].drawObject();
   }
 
-  glEnable(GL_LIGHTING);
-
   // switch to 2d (gluOrtho2D) and draw the clock hands
+  //*
+  glPushMatrix();
+    glMatrixMode(GL_PROJECTION);      // Select the Projection matrix for operation
+    glLoadIdentity();                 // Reset Projection matrix
+    gluOrtho2D(-1.0, 1.0, -1.0, 1.0);
+    drawClock();
+  glPopMatrix();
+  //*/
+  
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  gluPerspective(camera.fov, viewport.w/viewport.h, camera.nearplane, camera.farplane);
 
+  glEnable(GL_LIGHTING);
+  glEnable(GL_COLOR_MATERIAL);
   // you will need to enable various GL features (like GL_LIGHTING) here
   // this is probably the hardest function to fill in, but
   // it shouldn't be very long or complicated, it will be hard
@@ -331,7 +405,10 @@ void mySpecial(int key, int x, int y) {
     camera.center += SlVector3(-0.1,0.0,0.0);
 	}
 	else
+  {
+
 	  std::cout<<"right key pressed";
+  }
 	break;
   default:
 	std::cerr<<"That key is not recognized"<<std::endl;
