@@ -202,7 +202,7 @@ int main(int argc, char *argv[]) {
         {
             colsLeft--;
 
-            /*
+            //*
             Seam seams[imageHeight];
             for (int i = 0; i < imageHeight; ++i)
             {
@@ -269,33 +269,35 @@ int main(int argc, char *argv[]) {
             for (int i = seamRef->seam.size()-1; i >= 0; i--)
             {
                 //std::cout << "ITER " << i << "/" << seamRef->seam.size()-1 << std::endl;
-                int offset = seamRef->coordinates(i).first*imageHeight + seamRef->coordinates(i).second;
+                int offset = seamRef->coordinates(i).first*input.height() + seamRef->coordinates(i).second;
                 //std::cout << "\t" << image[offset+1][0] << " " << image[offset+1][1] << " " << image[offset+1][2] << std::endl;
 
-                for (int j = seamRef->coordinates(i).first; j < imageHeight-1; ++j)
+                //*
+                for (int j = seamRef->coordinates(i).second; j < imageHeight-1; ++j)
                 {
-                    int tmpOffset = j*imageHeight + seamRef->coordinates(i).second;
+                    int tmpOffset = seamRef->coordinates(i).first*input.height() + j;
                     image[tmpOffset][0] = image[tmpOffset+1][0];
                     image[tmpOffset][1] = image[tmpOffset+1][1];
                     image[tmpOffset][2] = image[tmpOffset+1][2];
                 }
+                //*/
 
                 //Uncomment this to show seam
                 /*
                 image[offset][0] = 100.0;
                 image[offset][1] = 100.0;
                 image[offset][2] = 100.0;
-                //
+                //*/
 
                 //image.erase(image.begin()+offset);
                 //energyMatrix.erase(energyMatrix.begin()+offset);
 
                 //std::cout << "\t" << image[offset][0] << " " << image[offset][1] << " " << image[offset][2] << std::endl;
-                energyMap(energyMatrix, image, seamRef->coordinates(i).first, seamRef->coordinates(i).second, imageWidth-1, imageHeight);
+                energyMap(energyMatrix, image, seamRef->coordinates(i).first, seamRef->coordinates(i).second, imageWidth-1, input.height());
             }
 
             imageHeight--;
-            */
+            //*/
         }
 
         std::cout << rowsLeft << " " << colsLeft << " " 
@@ -312,9 +314,9 @@ int main(int argc, char *argv[]) {
     {
         for (unsigned int j=0; j<imageHeight; j++) 
         {
-            output(i, j, 0) = image[i*output.height()+j][0];
-            output(i, j, 1) = image[i*output.height()+j][1];
-            output(i, j, 2) = image[i*output.height()+j][2];
+            output(i, j, 0) = image[i*input.height()+j][0];
+            output(i, j, 1) = image[i*input.height()+j][1];
+            output(i, j, 2) = image[i*input.height()+j][2];
         }
     }
     CImg<double> rgb = output.LabtoRGB();
