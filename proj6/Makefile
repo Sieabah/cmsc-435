@@ -9,3 +9,8 @@ clean:
 test:
 	./seamcarving house.jpg out.jpg 312 384
 
+test2:
+	./seamcarving house.jpg out.jpg 500 384
+
+test3:
+	./seamcarving yo_couch.jpg out.jpg 375 450
