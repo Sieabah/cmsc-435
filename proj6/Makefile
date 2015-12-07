@@ -14,3 +14,6 @@ test2:
 
 test3:
 	./seamcarving yo_couch.jpg out.jpg 375 200
+
+test4:
+	./seamcarving guy.jpg out.jpg 100 333
