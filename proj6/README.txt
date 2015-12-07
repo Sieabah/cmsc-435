@@ -19,3 +19,4 @@ Resources:
 - Book
 - Cplusplus.org
 - Lots of notes on paper of data structures
+- Found a proper dual gradient explanation: http://www.cs.princeton.edu/courses/archive/spr13/cos226/assignments/seamCarving.html, made my images look better after not using magnitude but squaring it.

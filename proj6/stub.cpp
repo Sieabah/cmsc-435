@@ -34,10 +34,10 @@ struct pixelEnergy
 };
 
 /**
- * energyMap - Creates an energy map from the given pixel
+ * energyMap - Creates an dual-gradient energy map from the given pixel
  *     This creates a two-energy system in which the CAIR algorithm will 
  *         emphasize horizontal or vertical energy depending on the direction
- *         the seam is being created in
+ *         the seam is being created in. 
  * @param matrix energy cost matrix
  * @param image  the pixel array
  * @param i      row position
@@ -48,30 +48,49 @@ struct pixelEnergy
 void energyMap(std::vector<pixelEnergy> &matrix, std::vector<SlVector3> &image, 
     int i, int j, int width, int height)
 {
-    //Horizontal-seam energy calculation
+    SlVector3 tmp;
+    //Horizontal-seam energy calculation 
     //
     //If row is on left edge
     if(j == 0)
+    {
         //Average current pixel with right pixel
         matrix[i*height+j].horizontal = mag(image[i*height+j] - image[i*height+j+1]);
+    }
     //If row is on right edge
     else if (j+1 >= height)
+    {
         //Average current pixel with left pixel
         matrix[i*height+j].horizontal = mag(image[i*height+j-1] - image[i*height+j]);
+    }
     else
+    {
         //Otherwise calculate surrounding pixels
         matrix[i*height+j].horizontal = mag(image[i*height+j-1] - image[i*height+j+1]);
+    }
 
     //Vertical-seam energy calculation
     //
     //If col is on left edge
     if(i == 0)
-        matrix[i*height+j].vertical = mag(image[i*height+j] - image[(i+1)*height+j]);
+    {
+        tmp = image[i*height+j] - image[(i+1)*height+j];
+        matrix[i*height+j].vertical = tmp[0] * tmp[0] + tmp[1] * tmp[1] + tmp[2] * tmp[2];
+        //matrix[i*height+j].vertical = mag(image[i*height+j] - image[(i+1)*height+j]);
+    }
     //If col is on right edge
     else if (i+1 >= width)
-        matrix[i*height+j].vertical = mag(image[(i-1)*height+j] - image[i*height+j]);
+    {
+        tmp = image[(i-1)*height+j] - image[i*height+j];
+        matrix[i*height+j].vertical = tmp[0] * tmp[0] + tmp[1] * tmp[1] + tmp[2] * tmp[2];
+        //matrix[i*height+j].vertical = mag(image[(i-1)*height+j] - image[i*height+j]);
+    }
     else
-        matrix[i*height+j].vertical = mag(image[(i-1)*height+j] - image[(i+1)*height+j]);
+    {
+        tmp = image[(i-1)*height+j] - image[(i+1)*height+j];
+        matrix[i*height+j].vertical = tmp[0] * tmp[0] + tmp[1] * tmp[1] + tmp[2] * tmp[2];
+        //matrix[i*height+j].vertical = mag(image[(i-1)*height+j] - image[(i+1)*height+j]);
+    }
 }
 
 /**
