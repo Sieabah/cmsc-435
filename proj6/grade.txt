@@ -1,0 +1,29 @@
+  +------------------------------------------------------+
+  |_10     10%          README comment or file           |
+  |       __1      1%   Submitted a readme file          |
+  |       __5      5%   Description of assignment        |
+  |       __2      2%   Clean submission(no .o .d files) |
+  |       __2      2%   Statement of help                |
+  +------------------------------------------------------+
+  |_15     15%          Implementation                   |
+  |       _10     10%   Compiles and executes w/o errors |
+  |       __5      5%   Written in C++                   |
+  +------------------------------------------------------+
+  |_15     15%          Input/output                     |
+  |       __5      5%   Takes input image			     |
+  |       __5      5%   Outputs carved image             |
+  |       __5      5%   Output image has desired size    |
+  +------------------------------------------------------+
+  |_30     30%   		Energy function                  |
+  +------------------------------------------------------+
+  |_30     30%   		Carving in horizontal and/or     |
+  |                     vertical direction removing 	 |
+  |						lowest-importance seam           |  
+  +------------------------------------------------------+
+  |__0     10%          (634) Scharr gradient operator   |
+  |__0     10%          (Ex) Compute energy once         |
+  |_10     10%          (Ex) Webpage with your results   |  
+  +------------------------------------------------------+
+  |110   Total          (of 100/435 or 110/634)          |
+  +------------------------------------------------------+
+  God job.
