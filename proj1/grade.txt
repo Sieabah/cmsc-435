@@ -1,0 +1,44 @@
+  +--------------------------------------------------------+
+  |___   10%         README comment or file                |
+  |      ___    1%   Submitted a readme file               |
+  |      ___    7%   Description of assignment             |
+  |      ___    2%   Statement of help                     |
+  +--------------------------------------------------------+
+  |___   20%         Implementation                        |
+  |      ___   10%   Compiles and executes w/o errors      |
+  |      ___    5%   Written in C/C++;                     |
+  +--------------------------------------------------------+
+  |___   15%         Input/output                          |
+  |      ___    5%   Correctly parses nff file             |
+  |      ___    5%   Outputs valid ppm image               |
+  |      ___    5%   Correct indexing in pixels array      |
+  +--------------------------------------------------------+
+  |___   10%         Field of view                         |
+  |      ___    5%   Converts fov angle to radians         |
+  |      ___    5%   Calculates l,r,b,t correctly          |
+  +--------------------------------------------------------+
+  |___   20%         Basis coordinate system               |
+  |      ___    5%   w=from-at or at-from                  |
+  |      ___    5%   u=up^w or w^up                        |
+  |      ___    5%   v=w^u or u^w                          |
+  |      ___    5%   all normalized                        |
+  +--------------------------------------------------------+
+  |___   10%         Positioning rays                      |
+  |      ___    2%   u_s from i                            |
+  |      ___    2%   v_s from j                            |
+  |      ___    2%   w_s with correct sign                 |
+  |      ___    4%   d=u_s*u + v_s*v + w_s*w               |
+  +--------------------------------------------------------+
+  |___   15%         Ray-triangle intersection             |
+  |      ___    10%  Ray-plane intersection                |
+  |      ___    10%   Inside/outside triangle test         |
+  +--------------------------------------------------------+
+  |___   10%         (634) Concave polygons intersection   |
+  |      ___    10%  Concave polygons                 	   |
+  +--------------------------------------------------------+
+  |___   10%         (Ex) Ray-sphere intersection          |
+  |      ___    5%   Discriminant                          |
+  |      ___    5%   First & second intersections          |
+  +--------------------------------------------------------+
+  |___               Total (of 100/435 or 110/634)         |
+  +--------------------------------------------------------+
