@@ -3,3 +3,6 @@
 .jpg
 .ppm
 .tiff
+
+.idea
+*.iml
