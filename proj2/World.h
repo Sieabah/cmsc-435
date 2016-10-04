@@ -28,9 +28,11 @@ public:
     virtual ~World()
     {
         //For all actors
-        for(int i = 0; i < actors.size(); i++)
-            //Delete them
-            delete &actors[i];
+        while(!actors.empty()){
+            //Delete
+            delete actors.back();
+            actors.pop_back();
+        }
     }
 
     /**
