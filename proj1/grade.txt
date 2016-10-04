@@ -17,9 +17,9 @@
   |      _5_    5%   Converts fov angle to radians         |
   |      _5_    5%   Calculates l,r,b,t correctly          |
   +--------------------------------------------------------+
-  |_11   20%         Basis coordinate system               |
+  |_15   20%         Basis coordinate system               |
   |      _5_    5%   w=from-at or at-from                  |
-  |      _1_    5%   u=up^w or w^up                        |	u should be formed before v since v depends on u (-4)
+  |      _5_    5%   u=up^w or w^up                        |	
   |      _0_    5%   v=w^u or u^w                          |	v is not the up vector in general (-5)
   |      _5_    5%   all normalized                        |
   +--------------------------------------------------------+
@@ -40,5 +40,5 @@
   |      _0_    5%   Discriminant                          |
   |      _0_    5%   First & second intersections          |
   +--------------------------------------------------------+
-  |_86               Total (of 100/435 or 110/634)         |
+  |_91               Total (of 100/435 or 110/634)         |
   +--------------------------------------------------------+
