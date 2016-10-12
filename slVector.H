@@ -61,6 +61,7 @@
 
 class SlVector2;
 class SlVector3;
+class SlVector4;
 
 #include <cmath>
 #include <cstdlib>
@@ -245,6 +246,155 @@ inline double min(const SlVector3 &a);
 
 inline SlVector3 max(const SlVector3 &a,const SlVector3 &b);
 inline SlVector3 min(const SlVector3 &a,const SlVector3 &b);
+// Computes a NEW vector by taking the max component in the
+// x,y,z direction from a and b.  ie: r[i] = max(a[i],b[i])
+// Note: signed values are used.
+
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+
+
+class SlVector4 {
+  // Class to store a three dimensional vector.
+  // Expected uses include point in R3, RGB color, etc.
+public:
+
+  //----------------------------------------------
+  // Constructors
+
+  inline SlVector4();
+  inline SlVector4(double d0,double d1,double d2, double d3);
+
+  inline SlVector4(const SlVector4 &da);
+  inline SlVector4(const double    *da);
+  // da should point to a double[4] that will be copied
+
+
+  //----------------------------------------------
+  // Index operators
+
+  inline double &operator[](unsigned int i)      ;
+  inline double  operator[](unsigned int i) const;
+
+  inline double &operator()(unsigned int i)      ;
+  inline double  operator()(unsigned int i) const;
+
+  //----------------------------------------------
+  // Assignment and set
+
+  inline SlVector4 &set(double d0, double d1, double d2, double d3);
+
+  inline SlVector4 &set(const SlVector4 &da);
+  inline SlVector4 &set(const double    *da);
+  // da should point to a double[3] that will be copied
+
+  inline SlVector4 &operator=(const SlVector4 &da);
+  inline SlVector4 &operator=(const double    *da);
+
+
+  //----------------------------------------------
+  // Comparison operators
+
+  inline int operator==(const SlVector4 &da) const;
+  inline int operator!=(const SlVector4 &da) const;
+
+
+  //----------------------------------------------
+  // In place arithmetic
+
+  inline SlVector4 &operator+=(double d);
+  inline SlVector4 &operator-=(double d);
+  inline SlVector4 &operator*=(double d);
+  inline SlVector4 &operator/=(double d);
+
+  inline SlVector4 &operator+=(const SlVector4 &da);
+  inline SlVector4 &operator-=(const SlVector4 &da);
+  inline SlVector4 &operator*=(const SlVector4 &da);
+  inline SlVector4 &operator/=(const SlVector4 &da);
+  // Componentwise operations
+
+  inline SlVector4 &maxSet(const SlVector4 &da);
+  inline SlVector4 &minSet(const SlVector4 &da);
+  // Sets data[i] = max(data[i],da[i]) or min
+
+
+  //----------------------------------------------
+  // Define Components
+
+  enum Index { X = 0 , Y = 1 , Z = 2 , W = 3,
+			   R = 0 , G = 1 , B = 2 , A = 3 };
+
+public:
+  //----------------------------------------------
+  // Public data members
+
+  double data[4];
+
+  //----------------------------------------------
+};
+
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+// Operators for class SlVector3
+
+inline SlVector4 operator-(const SlVector4 &a);
+
+inline SlVector4 operator+(const SlVector4 &a,const SlVector4 &b);
+inline SlVector4 operator-(const SlVector4 &a,const SlVector4 &b);
+inline SlVector4 operator*(const SlVector4 &a,const SlVector4 &b);
+inline SlVector4 operator/(const SlVector4 &a,const SlVector4 &b);
+
+inline SlVector4 operator+(const SlVector4 &a, double b);
+inline SlVector4 operator-(const SlVector4 &a, double b);
+inline SlVector4 operator*(const SlVector4 &a, double b);
+inline SlVector4 operator/(const SlVector4 &a, double b);
+
+inline SlVector4 operator+(double a, const SlVector4 &b);
+inline SlVector4 operator-(double a, const SlVector4 &b);
+inline SlVector4 operator*(double a, const SlVector4 &b);
+inline SlVector4 operator/(double a, const SlVector4 &b);
+
+std::istream &operator>>(std::istream &strm,      SlVector4 &v);
+std::ostream &operator<<(std::ostream &strm,const SlVector4 &v);
+
+//-------------------------------------------------------------------
+// Norm type functions for SlVector3
+
+inline double   l1Norm(const SlVector4 &a);
+inline double   l2Norm(const SlVector4 &a);
+inline double lInfNorm(const SlVector4 &a);
+// Computes the l1, l2 or lInfinity norm of a
+
+inline double    mag(const SlVector4 &a);
+inline double sqrMag(const SlVector4 &a);
+// mag is the l2Norm or magnitude of the vector
+// sqrMag is mag^2, which is faster to compute
+
+inline double normalize(SlVector4 &a);
+// SETS a = a/mag(a)
+
+
+inline double      dot(const SlVector4 &a,const SlVector4 &b);
+inline SlVector4 cross(const SlVector4 &a,const SlVector4 &b);
+// Compute the dot and cros product of a and b.
+
+inline double box(const SlVector4 &a,const SlVector4 &b,const SlVector4 &c);
+// Compute the box (aka tripple) product of a, b, and d.
+
+inline SlVector4 abs(const SlVector4 &a);
+// returns a vector with r[i] = abs(a[i])
+
+inline double sum(const SlVector4 &a);
+// return a[0]+a[1]+a[2]
+
+inline double max(const SlVector4 &a);
+inline double min(const SlVector4 &a);
+// Returns the max or min component of a.
+
+inline SlVector4 max(const SlVector4 &a,const SlVector4 &b);
+inline SlVector4 min(const SlVector4 &a,const SlVector4 &b);
 // Computes a NEW vector by taking the max component in the
 // x,y,z direction from a and b.  ie: r[i] = max(a[i],b[i])
 // Note: signed values are used.
@@ -828,6 +978,321 @@ inline SlVector3 min(const SlVector3 &a,const SlVector3 &b) {
   return SlVector3((a[0]<b[0])?a[0]:b[0],
 		   (a[1]<b[1])?a[1]:b[1],
 		   (a[2]<b[2])?a[2]:b[2]);
+}
+
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+// Inline implementation of SlVector4
+
+inline double &SlVector4::operator[](unsigned int i) {
+  DB_CHECK(i<4);
+  return data[i];
+}
+inline double &SlVector4::operator()(unsigned int i) {
+  DB_CHECK(i<4);
+  return data[i];
+}
+
+inline double  SlVector4::operator[](unsigned int i) const {
+  DB_CHECK(i<4);
+  return data[i];
+}
+
+inline double  SlVector4::operator()(unsigned int i) const {
+  DB_CHECK(i<4);
+  return data[i];
+}
+
+//-------------------------------------------------------------------
+
+inline SlVector4::SlVector4() {
+  data[0] = data[1] = data[2] = data[3] = 0.0;
+}
+
+inline SlVector4::SlVector4(double d0,double d1,double d2,double d3) {
+  data[0] = d0;
+  data[1] = d1;
+  data[2] = d2;
+  data[3] = d3;
+}
+
+inline SlVector4::SlVector4(const SlVector4 &da) {
+  data[0] = da[0];
+  data[1] = da[1];
+  data[2] = da[2];
+  data[3] = da[3];
+}
+
+inline SlVector4::SlVector4(const double *da) {
+  data[0] = da[0];
+  data[1] = da[1];
+  data[2] = da[2];
+  data[3] = da[3];
+}
+
+//-------------------------------------------------------------------
+
+inline SlVector4 &SlVector4::set(double d0, double d1, double d2, double d3) {
+  data[0] = d0;
+  data[1] = d1;
+  data[2] = d2;
+  data[3] = d3;
+  return (*this);
+}
+
+inline SlVector4 &SlVector4::set(const SlVector4 &da) {
+  data[0] = da[0];
+  data[1] = da[1];
+  data[2] = da[2];
+  data[3] = da[3];
+  return (*this);
+}
+
+inline SlVector4 &SlVector4::set(const double *da) {
+  data[0] = da[0];
+  data[1] = da[1];
+  data[2] = da[2];
+  data[3] = da[3];
+  return (*this);
+}
+
+//-------------------------------------------------------------------
+
+inline SlVector4 &SlVector4::operator=(const SlVector4 &da) {
+  return set(da);
+}
+
+inline SlVector4 &SlVector4::operator=(const double *da) {
+  return set(da);
+}
+
+//-------------------------------------------------------------------
+
+inline SlVector4 &SlVector4::operator+=(double d) {
+  data[0] += d;
+  data[1] += d;
+  data[2] += d;
+  data[3] += d;
+  return (*this);
+}
+
+inline SlVector4 &SlVector4::operator-=(double d) {
+  data[0] -= d;
+  data[1] -= d;
+  data[2] -= d;
+  data[3] -= d;
+  return (*this);
+}
+
+inline SlVector4 &SlVector4::operator*=(double d) {
+  data[0] *= d;
+  data[1] *= d;
+  data[2] *= d;
+  data[3] *= d;
+  return (*this);
+}
+
+inline SlVector4 &SlVector4::operator/=(double d) {
+  data[0] /= d;
+  data[1] /= d;
+  data[2] /= d;
+  data[3] /= d;
+  return (*this);
+}
+
+//-------------------------------------------------------------------
+
+inline SlVector4 &SlVector4::operator+=(const SlVector4 &da) {
+  data[0] += da[0];
+  data[1] += da[1];
+  data[2] += da[2];
+  data[3] += da[3];
+  return (*this);
+}
+
+inline SlVector4 &SlVector4::operator-=(const SlVector4 &da) {
+  data[0] -= da[0];
+  data[1] -= da[1];
+  data[2] -= da[2];
+  data[3] -= da[3];
+  return (*this);
+}
+
+inline SlVector4 &SlVector4::operator*=(const SlVector4 &da) {
+  data[0] *= da[0];
+  data[1] *= da[1];
+  data[2] *= da[2];
+  data[3] *= da[3];
+  return (*this);
+}
+
+inline SlVector4 &SlVector4::operator/=(const SlVector4 &da) {
+  data[0] /= da[0];
+  data[1] /= da[1];
+  data[2] /= da[2];
+  data[3] /= da[3];
+  return (*this);
+}
+
+//-------------------------------------------------------------------
+
+inline SlVector4 &SlVector4::maxSet(const SlVector4 &da) {
+  if (da[0] > data[0]) data[0] = da[0];
+  if (da[1] > data[1]) data[1] = da[1];
+  if (da[2] > data[2]) data[2] = da[2];
+  if (da[3] > data[3]) data[3] = da[3];
+  return (*this);
+}
+
+inline SlVector4 &SlVector4::minSet(const SlVector4 &da) {
+  if (da[0] < data[0]) data[0] = da[0];
+  if (da[1] < data[1]) data[1] = da[1];
+  if (da[2] < data[2]) data[2] = da[2];
+  if (da[3] < data[3]) data[3] = da[3];
+  return (*this);
+}
+
+//-------------------------------------------------------------------
+
+inline SlVector4 operator-(const SlVector4 &a) {
+  return SlVector4(-a[0],-a[1],-a[2],-a[3]);
+}
+
+//-------------------------------------------------------------------
+
+inline SlVector4 operator+(const SlVector4 &a,const SlVector4 &b) {
+  return SlVector4(a[0] + b[0], a[1] + b[1], a[2] + b[2], a[3] + b[3]);
+}
+
+inline SlVector4 operator-(const SlVector4 &a,const SlVector4 &b) {
+  return SlVector4(a[0] - b[0], a[1] - b[1], a[2] - b[2], a[3] - b[3]);
+}
+
+inline SlVector4 operator*(const SlVector4 &a,const SlVector4 &b){
+  return SlVector4(a[0] * b[0], a[1] * b[1], a[2] * b[2], a[3] * b[3]);
+}
+
+inline SlVector4 operator/(const SlVector4 &a,const SlVector4 &b){
+  return SlVector4(a[0] / b[0], a[1] / b[1], a[2] / b[2], a[3] / b[3]);
+}
+
+//-------------------------------------------------------------------
+
+inline SlVector4 operator+(const SlVector4 &a,double b){
+  return SlVector4(a[0] + b, a[1] + b, a[2] + b, a[3] + b);
+}
+
+inline SlVector4 operator-(const SlVector4 &a,double b){
+  return SlVector4(a[0] - b, a[1] - b, a[2] - b, a[3] - b);
+}
+
+inline SlVector4 operator*(const SlVector4 &a,double b){
+  return SlVector4(a[0] * b, a[1] * b, a[2] * b, a[3] * b);
+}
+
+inline SlVector4 operator/(const SlVector4 &a,double b){
+  return SlVector4(a[0] / b, a[1] / b, a[2] / b, a[3] / b);
+}
+
+//-------------------------------------------------------------------
+
+inline SlVector4 operator+(double a,const SlVector4 &b){
+  return SlVector4(a + b[0], a + b[1], a + b[2], a + b[3]);
+}
+
+inline SlVector4 operator-(double a,const SlVector4 &b){
+  return SlVector4(a - b[0], a - b[1], a - b[2], a + b[3]);
+}
+
+inline SlVector4 operator*(double a,const SlVector4 &b){
+  return SlVector4(a * b[0], a * b[1], a * b[2], a + b[3]);
+}
+
+inline SlVector4 operator/(double a,const SlVector4 &b){
+  return SlVector4(a / b[0], a / b[1], a / b[2], a + b[3]);
+}
+
+//-------------------------------------------------------------------
+
+inline double l1Norm(const SlVector4 &a) {
+  return (((a[0]>0)?a[0]:-a[0])+
+	  ((a[1]>0)?a[1]:-a[1])+
+	  ((a[2]>0)?a[2]:-a[2])+
+	  ((a[3]>0)?a[3]:-a[3]));
+}
+
+inline double l2Norm(const SlVector4 &a) {
+  return sqrt(a[0] * a[0] + a[1] * a[1] + a[2] * a[2] + a[3] * a[3]);
+}
+
+inline double lInfNorm(const SlVector4 &a) {
+  return max(abs(a));
+}
+
+inline double mag(const SlVector4 &a) {
+  return sqrt(a[0] * a[0] + a[1] * a[1] + a[2] * a[2] + a[3] * a[3]);
+}
+
+inline double sqrMag(const SlVector4 &a) {
+  return (a[0] * a[0] + a[1] * a[1] + a[2] * a[2] + a[3] * a[3]);
+}
+
+inline double normalize(SlVector4 &a) {
+  double m = mag(a);
+  if (m != 0) a /= m;
+  return m;
+}
+
+//-------------------------------------------------------------------
+
+inline double dot(const SlVector4 &a,const SlVector4 &b) {
+  return (a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3]);
+}
+
+inline SlVector4 cross(const SlVector4 &a,const SlVector4 &b) {
+  return SlVector4(a[1] * b[2] - b[1] * a[2],
+		   a[2] * b[0] - b[2] * a[0],
+	  a[0] * b[1] - b[0] * a[1], 0);
+}
+
+//-------------------------------------------------------------------
+
+inline SlVector4 abs(const SlVector4 &a) {
+  return  SlVector4(((a[0]>0)?a[0]:-a[0]),
+	  ((a[1]>0)?a[1]:-a[1]),
+	  ((a[2]>0)?a[2]:-a[2]),
+	  ((a[3]>0)?a[3]:-a[3]));
+}
+
+inline double sum(const SlVector4 &a) {
+  return a[0]+a[1]+a[2]+a[4];
+}
+
+//-------------------------------------------------------------------
+
+inline double max(const SlVector4 &a) {
+  return std::max<double>(std::max<double>(std::max<double>(a[0], a[1]), a[2]), a[3]);
+}
+
+inline double min(const SlVector4 &a) {
+  return std::min<double>(std::min<double>(std::min<double>(a[0], a[1]), a[2]), a[3]);
+}
+
+//-------------------------------------------------------------------
+
+inline SlVector4 max(const SlVector4 &a,const SlVector4 &b) {
+  return SlVector4((a[0]>b[0])?a[0]:b[0],
+	  (a[1]>b[1])?a[1]:b[1],
+	  (a[2]>b[2])?a[2]:b[2],
+	  (a[3]>b[3])?a[3]:b[3]);
+}
+
+inline SlVector4 min(const SlVector4 &a,const SlVector4 &b) {
+  return SlVector4((a[0]<b[0])?a[0]:b[0],
+	  (a[1]<b[1])?a[1]:b[1],
+	  (a[2]<b[2])?a[2]:b[2],
+	  (a[3]<b[3])?a[3]:b[3]);
 }
 
 
