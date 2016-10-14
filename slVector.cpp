@@ -53,27 +53,12 @@
 //-------------------------------------------------------------------
 
 #include "slVector.H"
+#include "slIO.H"
 
 using std::istream;
 using std::ostream;
 using std::ios;
 
-inline std::istream &eatChar(char c,std::istream &buf) {
-	char r;
-	buf >> r;
-	if (r!=c) {
-		buf.clear(buf.rdstate() | std::ios::failbit);
-	}
-	return buf;
-}
-
-inline std::istream &eatStr(const char *s,std::istream &buf) {
-  while (*s != '\0') {
-    eatChar(*s,buf);
-    s++;
-  }
-  return buf;
-}
 //-------------------------------------------------------------------
 
 istream &operator>>(istream &strm,SlVector3 &v) {
@@ -94,6 +79,32 @@ ostream &operator<<(ostream &strm,const SlVector3 &v) {
   strm << v[0]; strm << ",";
   strm << v[1]; strm << ",";
   strm << v[2]; strm << "]";
+  return strm;
+}
+
+//-------------------------------------------------------------------
+
+istream &operator>>(istream &strm,SlVector4 &v) {
+  ios::fmtflags orgFlags = strm.setf(ios::skipws);
+  eatChar('[',strm);
+  strm >> v[0];
+  eatChar(',',strm);
+  strm >> v[1];
+  eatChar(',',strm);
+  strm >> v[2];
+  eatChar(',',strm);
+  strm >> v[3];
+  eatChar(']',strm);
+  strm.flags(orgFlags);
+  return strm;
+}
+
+ostream &operator<<(ostream &strm,const SlVector4 &v) {
+  strm << "[";
+  strm << v[0]; strm << ",";
+  strm << v[1]; strm << ",";
+  strm << v[2]; strm << ",";
+  strm << v[3]; strm << "]";
   return strm;
 }
 
