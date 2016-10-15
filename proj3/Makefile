@@ -1,7 +1,7 @@
 CPPFLAGS = -ansi -Wall -g
 
 trace: *.h *.cpp
-	g++ main.cpp Polygon.cpp Renderer.cpp Vector3D.cpp World.cpp Hit.cpp -lg -o trace
+	g++ -I Eigen/ *.cpp -lg -o trace
 
 clean:
 	rm -f *.o *.out

@@ -11,6 +11,7 @@ trace <input nff> <output.ppm>
 
 Resources:
 
+Eigen3: http://eigen.tuxfamily.org/
 Book, heavily. Piazza, and email with professor. I didn't use supplied code but modified my previous entry to fix a lot of inheritance I had problems with (logical-wise)
 
 Google for various C++ functions and errors that happened in the compiler, mostly irrelevant.
