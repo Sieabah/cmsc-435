@@ -7,7 +7,7 @@
  * Implementation of class responsible for generation of image
  */
 
-#include "Renderer.h"
+#include "ViewDetails.h"
 #include "World.h"
 #include <iostream>
 #include <stdio.h>
@@ -40,7 +40,7 @@ struct Color{
  * Renderer
  * Default constructor
  */
-Renderer::Renderer(): position(Vector3D()), lookAt(Vector3D()), upVector(Vector3D()),
+ViewDetails::ViewDetails(): position(Vector3D()), lookAt(Vector3D()), upVector(Vector3D()),
                       fov(0), hither(0), resX(640),resY(480),
                       backgroundColor(Vector3D(0,0,0)), fillColor(Vector3D(255,0,0)){};
 
@@ -48,7 +48,7 @@ Renderer::Renderer(): position(Vector3D()), lookAt(Vector3D()), upVector(Vector3
  * PrintRenderInformation
  * Prints basic information about the renderer
  */
-void Renderer::PrintRenderInformation()
+void ViewDetails::PrintRenderInformation()
 {
     std::cout << "Background: " << backgroundColor << std::endl;
     std::cout << "Fill: " << fillColor << std::endl;
@@ -89,7 +89,7 @@ void Renderer::PrintRenderInformation()
  * Render
  * render image to screen with given actors and world
  */
-void Renderer::Render(std::string outputFile, const std::vector<Actor*>* actors, World &world, bool printout) {
+void ViewDetails::Render(std::string outputFile, const std::vector<Actor*>* actors, World &world, bool printout) {
 
     //Data array
     unsigned char pixels[height()][width()][3];
@@ -137,7 +137,7 @@ void Renderer::Render(std::string outputFile, const std::vector<Actor*>* actors,
  * up()
  * Return up vector
  */
-Vector3D Renderer::up() {
+Vector3D ViewDetails::up() {
     return upVector;
 }
 
@@ -145,7 +145,7 @@ Vector3D Renderer::up() {
  * p
  * Return point on line created between eye and lookat point
  */
-Vector3D Renderer::p(double t) {
+Vector3D ViewDetails::p(double t) {
     return eye() + (d() * t);
 }
 
@@ -153,7 +153,7 @@ Vector3D Renderer::p(double t) {
  * d
  * Return point line created between eye and lookat point
  */
-Vector3D Renderer::d() {
+Vector3D ViewDetails::d() {
     return eye() - s();
 }
 
@@ -161,7 +161,7 @@ Vector3D Renderer::d() {
  * s
  * Return lookat point
  */
-Vector3D Renderer::s() {
+Vector3D ViewDetails::s() {
     return lookAt;
 }
 
@@ -169,7 +169,7 @@ Vector3D Renderer::s() {
  * eye
  * Return camera position
  */
-Vector3D Renderer::eye() {
+Vector3D ViewDetails::eye() {
     return position;
 }
 
@@ -177,7 +177,7 @@ Vector3D Renderer::eye() {
  * background
  * Return background vector color
  */
-Vector3D Renderer::background() {
+Vector3D ViewDetails::background() {
     return backgroundColor;
 }
 
@@ -185,7 +185,7 @@ Vector3D Renderer::background() {
  * foreground
  * Return fill color vector color
  */
-Vector3D Renderer::foreground() {
+Vector3D ViewDetails::foreground() {
     return fillColor;
 }
 
@@ -193,14 +193,14 @@ Vector3D Renderer::foreground() {
  * height
  * Return Y resolution
  */
-unsigned int Renderer::height() {
+unsigned int ViewDetails::height() {
     return resY;
 }
 
 /**
  * Return X resolution
  */
-unsigned int Renderer::width() {
+unsigned int ViewDetails::width() {
     return resX;
 }
 
@@ -208,7 +208,7 @@ unsigned int Renderer::width() {
  * FoV
  * Return field of view
  */
-double Renderer::FoV() {
+double ViewDetails::FoV() {
     //Offset by 10 degrees?
     return fov+10;
 }
@@ -217,7 +217,7 @@ double Renderer::FoV() {
  * Fill
  * Set fill color
  */
-void Renderer::Fill(Vector3D color) {
+void ViewDetails::Fill(Vector3D color) {
     fillColor = color;
 }
 
@@ -225,7 +225,7 @@ void Renderer::Fill(Vector3D color) {
  * Background
  * Set background color
  */
-void Renderer::Background(double R, double G, double B) {
+void ViewDetails::Background(double R, double G, double B) {
     backgroundColor = Vector3D(R,G,B);
 }
 
@@ -233,7 +233,7 @@ void Renderer::Background(double R, double G, double B) {
  * Resolution
  * Set X,Y Resolution
  */
-void Renderer::Resolution(unsigned int x, unsigned int y) {
+void ViewDetails::Resolution(unsigned int x, unsigned int y) {
     resX = x; resY = y;
 }
 
@@ -241,7 +241,7 @@ void Renderer::Resolution(unsigned int x, unsigned int y) {
  * Hither
  * Set hither value
  */
-void Renderer::Hither(double value) {
+void ViewDetails::Hither(double value) {
     hither = value;
 }
 
@@ -249,7 +249,7 @@ void Renderer::Hither(double value) {
  * Angle
  * Set fov or camera angle
  */
-void Renderer::Angle(double value) {
+void ViewDetails::Angle(double value) {
     fov = value;
 }
 
@@ -257,7 +257,7 @@ void Renderer::Angle(double value) {
  * UpVec
  * Set the upwards vector
  */
-void Renderer::UpVec(Vector3D coord) {
+void ViewDetails::UpVec(Vector3D coord) {
     upVector = coord;
 }
 
@@ -265,7 +265,7 @@ void Renderer::UpVec(Vector3D coord) {
  * LookVec
  * Set the lookat vector
  */
-void Renderer::LookVec(Vector3D coord) {
+void ViewDetails::LookVec(Vector3D coord) {
     lookAt = coord;
 }
 
@@ -273,7 +273,7 @@ void Renderer::LookVec(Vector3D coord) {
  * Position
  * Set the camera position
  */
-void Renderer::Position(Vector3D coord) {
+void ViewDetails::Position(Vector3D coord) {
     position = coord;
 }
 
@@ -281,61 +281,61 @@ void Renderer::Position(Vector3D coord) {
  * w
  * return normalized w-vector
  */
-Vector3D Renderer::w() { return d().unit(); }
+Vector3D ViewDetails::w() { return d().unit(); }
 
 /**
  * u
  * return normalized u-vector
  */
-Vector3D Renderer::u() { return Vector3D::cross(up(), w()); }
+Vector3D ViewDetails::u() { return Vector3D::cross(up(), w()); }
 
 /**
  * v
  * return normalized v-vector
  */
-Vector3D Renderer::v() { return Vector3D::cross(w(), u()); }
+Vector3D ViewDetails::v() { return Vector3D::cross(w(), u()); }
 
 /**
  * d
  * Return distance to viewing pane/
  */
-double Renderer::dist() { return d().magnitude(); }
+double ViewDetails::dist() { return d().magnitude(); }
 
 /**
  * t
  * return t-value to viewing pane
  */
-double Renderer::t() { return tanf((float)(FoV() * PI/360)); }
+double ViewDetails::t() { return tanf((float)(FoV() * PI/360)); }
 
 /**
  * top
  * Return distance to top side of viewing pane
  */
-double Renderer::top() { return dist() * t(); }
+double ViewDetails::top() { return dist() * t(); }
 
 /**
  * bottom
  * Return distance to bottom side of viewing pane
  */
-double Renderer::bottom() { return top() * (-1); }
+double ViewDetails::bottom() { return top() * (-1); }
 
 /**
  * right
  * Return distance to right side of viewing pane
  */
-double Renderer::right() { return top() * (width() / height()); }
+double ViewDetails::right() { return top() * (width() / height()); }
 
 /**
  * left
  * Return distance to left side of viewing pane
  */
-double Renderer::left() { return right() * (-1); }
+double ViewDetails::left() { return right() * (-1); }
 
 /**
  * AddLight
  * Add light to render scene
  */
-void Renderer::AddLight(Vector3D light) {
+void ViewDetails::AddLight(Vector3D light) {
     lights.push_back(light);
 }
 
@@ -343,7 +343,7 @@ void Renderer::AddLight(Vector3D light) {
  * CalcLighting
  * Calculate lighting of material, position, direction, normal vector given an array of vectors
  */
-Vector3D Renderer::CalcLighting(Material material, Vector3D pos, Vector3D dir, Vector3D N, const std::vector<Actor*> *actors) const {
+Vector3D ViewDetails::CalcLighting(Material material, Vector3D pos, Vector3D dir, Vector3D N, const std::vector<Actor*> *actors) const {
     Vector3D color(0,0,0);
 
     //Precalculate intentity of lights
@@ -395,7 +395,7 @@ Vector3D Renderer::CalcLighting(Material material, Vector3D pos, Vector3D dir, V
  * trace
  * Ray-Trace given a set of actors
  */
-const Hit Renderer::trace(Ray r, const std::vector<Actor*> *actors) const {
+const Hit ViewDetails::trace(Ray r, const std::vector<Actor*> *actors) const {
 
     //Closest hit = null(essentially)
     Hit closest;

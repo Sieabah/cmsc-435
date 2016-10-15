@@ -7,9 +7,10 @@
  * This project demonstrates basic ray tracing
  */
 
-#include "World.h"
-#include <sys/stat.h>
 #include <iostream>
+#include "World.h"
+#include "Pipeline.h"
+#include <sys/stat.h>
 
 using namespace std;
 
@@ -39,8 +40,10 @@ int main(int argc, char *argv[]) {
     //Create world from NFF file
     World world = World::GenerateWorldFromNFF(string(argv[1]));
 
+    Pipeline rendering = Pipeline(&world);
+
     //Render the world
-    world.Render(argv[2]);
+    //world.Render(argv[2]);
 
     return 0;
 }

@@ -19,15 +19,16 @@
 
 #include <vector>
 #include <iostream>
+#include <utility>
 
 class World;
 
 #define PI 3.14159265358979323846
 
-class Renderer {
+class ViewDetails {
 public:
     //Default Constructor
-    Renderer();
+    ViewDetails();
 
     /**
      * Setters
@@ -104,6 +105,10 @@ public:
      * Ray-Trace ray vector given set of actors
      */
     const Hit trace(Ray r, const std::vector<Actor*> *actors) const;
+
+    const std::pair<unsigned int, unsigned int> resolution(){
+        return std::pair<unsigned int, unsigned int>(resX, resY);
+    };
 private:
     //Lights
     std::vector<Vector3D> lights;

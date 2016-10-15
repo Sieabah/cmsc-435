@@ -19,7 +19,7 @@
  * World()
  * Default constructor
  */
-World::World() : camera(Renderer()) {}
+World::World() : camera(ViewDetails()) {}
 
 /**
  * PrintWorldInformation
@@ -255,7 +255,7 @@ void World::AddActor(Actor *actor)
  * getRenderer
  * Returns pointer to renderer
  */
-Renderer * World::getRenderer() {
+ViewDetails * World::getRenderer() {
     return &camera;
 }
 

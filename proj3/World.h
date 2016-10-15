@@ -12,7 +12,7 @@
 
 #include "Vector3D.h"
 
-#include "Renderer.h"
+#include "ViewDetails.h"
 #include "Hit.h"
 #include "Ray.h"
 
@@ -38,7 +38,7 @@ public:
     /**
      * Return pointer to renderer
      */
-    Renderer * getRenderer();
+    ViewDetails * getRenderer();
 
     /**
      * AddPoly
@@ -79,7 +79,7 @@ private:
     //Polygons in world
     std::vector<Actor*> actors;
     //Camera
-    Renderer camera;
+    ViewDetails camera;
 };
 
 
