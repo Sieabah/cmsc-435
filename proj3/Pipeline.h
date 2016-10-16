@@ -15,7 +15,9 @@ private:
     World* m_world;
     Eigen::Matrix4d M_vp = Eigen::Matrix4d::Zero();
     Eigen::Matrix4d M_ortho = Eigen::Matrix4d::Zero();
+    Eigen::Matrix4d M_persp = Eigen::Matrix4d::Zero();
     Eigen::Matrix4d M_camera = Eigen::Matrix4d::Zero();
+    Eigen::Matrix4d M_matrix = Eigen::Matrix4d::Zero();
 
 protected:
     void GenerateViewMatrix(){
@@ -30,8 +32,8 @@ protected:
     }
     void GenerateOrthogonalMatrix(){
         ViewDetails *view = m_world->getRenderer();
-        double nearPlane = -1;
-        double farPlane = 1;
+        double nearPlane = view->getHither();
+        double farPlane = view->dist();
         M_ortho(0,0) = 2.0/(view->right()-view->left());
         M_ortho(0,3) = -(view->right()+view->left())/(view->right()-view->left());
 
@@ -71,15 +73,29 @@ protected:
         M_camera(2,3) = -view->eye().z;
 
         M_camera(3,3) = 1.0;
+    }
 
-        std::cout << M_camera << std::endl;
+    void GeneratePerspectiveMatrix(){
+        ViewDetails *view = m_world->getRenderer();
+
+        M_persp(0,0) = view->getHither();
+        M_persp(1,1) = view->getHither();
+
+        M_persp(2,2) = view->getHither() + view->dist();
+        M_persp(2,3) = -(view->getHither() * view->dist());
+        M_persp(3,2) = 1.0;
     }
 public:
 
     Pipeline(World *world): m_world(world){
         GenerateViewMatrix();
         GenerateOrthogonalMatrix();
+        GeneratePerspectiveMatrix();
         GenerateCameraMatrix();
+
+        M_matrix = M_vp * (M_ortho * M_persp) * M_camera;
+
+        std::cout << M_matrix;
     }
 
     void VertexProcessing(){

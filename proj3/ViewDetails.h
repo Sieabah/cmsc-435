@@ -106,9 +106,9 @@ public:
      */
     const Hit trace(Ray r, const std::vector<Actor*> *actors) const;
 
-    const std::pair<unsigned int, unsigned int> resolution(){
-        return std::pair<unsigned int, unsigned int>(resX, resY);
-    };
+    const std::pair<unsigned int, unsigned int> resolution();
+
+    double getHither(){ return hither; }
 private:
     //Lights
     std::vector<Vector3D> lights;

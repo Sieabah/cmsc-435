@@ -311,7 +311,7 @@ double ViewDetails::t() { return tanf((float)(FoV() * PI/360)); }
  * top
  * Return distance to top side of viewing pane
  */
-double ViewDetails::top() { return dist() * t(); }
+double ViewDetails::top() { return getHither() * t(); }
 
 /**
  * bottom
@@ -417,4 +417,8 @@ const Hit ViewDetails::trace(Ray r, const std::vector<Actor*> *actors) const {
     }
 
     return closest;
+}
+
+const std::pair<unsigned int, unsigned int> ViewDetails::resolution() {
+    return std::pair<unsigned int, unsigned int>(resX, resY);
 }
