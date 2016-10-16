@@ -7,8 +7,11 @@
 
 #include <Eigen/Dense>
 #include <utility>
+#include <algorithm>
 #include "World.h"
 #include "ViewDetails.h"
+#include "Actor.h"
+#include "Polygon.h"
 
 class Pipeline {
 private:
@@ -32,8 +35,8 @@ protected:
     }
     void GenerateOrthogonalMatrix(){
         ViewDetails *view = m_world->getRenderer();
-        double nearPlane = view->getHither();
-        double farPlane = view->dist();
+        double nearPlane = view->nearPlane();
+        double farPlane = view->farPlane();
         M_ortho(0,0) = 2.0/(view->right()-view->left());
         M_ortho(0,3) = -(view->right()+view->left())/(view->right()-view->left());
 
@@ -78,11 +81,11 @@ protected:
     void GeneratePerspectiveMatrix(){
         ViewDetails *view = m_world->getRenderer();
 
-        M_persp(0,0) = view->getHither();
-        M_persp(1,1) = view->getHither();
+        M_persp(0,0) = view->nearPlane();
+        M_persp(1,1) = view->nearPlane();
 
-        M_persp(2,2) = view->getHither() + view->dist();
-        M_persp(2,3) = -(view->getHither() * view->dist());
+        M_persp(2,2) = view->nearPlane() + view->dist();
+        M_persp(2,3) = -(view->nearPlane() * view->dist());
         M_persp(3,2) = 1.0;
     }
 public:
@@ -93,13 +96,26 @@ public:
         GeneratePerspectiveMatrix();
         GenerateCameraMatrix();
 
-        M_matrix = M_vp * (M_ortho * M_persp) * M_camera;
+        M_matrix = M_vp * M_ortho * M_persp * M_camera;
 
         std::cout << M_matrix;
     }
 
     void VertexProcessing(){
+        const std::vector<Actor*>* actors = m_world->Actors();
 
+        for(std::vector<Actor*>::const_iterator it = actors->begin(); it < actors->end(); it++){
+            Actor *actor = (*it);
+            std::for_each(actor->getVerticies()->begin(), actor->getVerticies()->end(),
+            [&](const vertex &vert){
+                Eigen::Vector4d vec;
+                vec(0) = vert.pos.x;
+                vec(1) = vert.pos.y;
+                vec(2) = vert.pos.z;
+                vec(3) = 1.0;
+                vert.camera_pos = M_matrix * vec;
+            });
+        }
     }
 
     void Clipping(){

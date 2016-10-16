@@ -311,7 +311,7 @@ double ViewDetails::t() { return tanf((float)(FoV() * PI/360)); }
  * top
  * Return distance to top side of viewing pane
  */
-double ViewDetails::top() { return getHither() * t(); }
+double ViewDetails::top() { return nearPlane() * t(); }
 
 /**
  * bottom

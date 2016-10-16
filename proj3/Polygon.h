@@ -18,33 +18,10 @@
 class Polygon: public Actor {
 public:
     /**
-     * vertex
-     * point in space
-     */
-    struct vertex {
-        //3D point in space
-        Vector3D pos;
-        //Tangent and bitangent of this point
-        double tangent, bitangent;
-
-        /**
-         * vertex
-         * constructor
-         */
-        vertex(const Vector3D &vec){pos = vec;}
-    };
-
-    /**
      * Default constructor
      * Inlined for simplicity
      */
     Polygon(){};
-
-    /**
-     * addVert
-     * Add vertex to polygon
-     */
-    void addVert(Vector3D coord);
 
     /**
      * addMaterial
@@ -79,9 +56,6 @@ private:
     Vector3D bitangent;
 
     double vecNormal;
-
-    //Vertices of the polygon
-    std::vector<vertex> vertices;
 };
 
 

@@ -10,14 +10,6 @@
 #include "Polygon.h"
 
 /**
- * addVert
- * Add vertex to polygon
- */
-void Polygon::addVert(Vector3D coord) {
-    vertices.push_back(vertex(coord));
-}
-
-/**
  * finalize
  * Precalculate values to detect if ray intersects poly
  */

@@ -17,6 +17,7 @@
 #include "Actor.h"
 #include "Ray.h"
 
+#include <limits>
 #include <vector>
 #include <iostream>
 #include <utility>
@@ -108,7 +109,8 @@ public:
 
     const std::pair<unsigned int, unsigned int> resolution();
 
-    double getHither(){ return hither; }
+    double nearPlane(){ return hither; }
+    double farPlane(){ return std::numeric_limits<double>::max(); }
 private:
     //Lights
     std::vector<Vector3D> lights;

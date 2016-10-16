@@ -9,14 +9,46 @@
 #ifndef RAYTRACER_ACTOR_H
 #define RAYTRACER_ACTOR_H
 
+#include <vector>
+
 #include "Hit.h"
 #include "Material.h"
+#include <Eigen/Dense>
 
 class Ray;
 class World;
 
+/**
+ * vertex
+ * point in space
+ */
+struct vertex {
+    //3D point in space
+    Vector3D pos;
+
+    //3D point in space
+    Eigen::Vector4d camera_pos;
+    //Tangent and bitangent of this point
+    double tangent, bitangent;
+
+    /**
+     * vertex
+     * constructor
+     */
+    vertex(const Vector3D &vec){pos = vec;}
+};
+
 class Actor {
 public:
+
+    /**
+     * addVert
+     * Add vertex to polygon
+     */
+    void addVert(Vector3D coord) {
+        vertices.push_back(vertex(coord));
+    }
+
     /**
      * Actor
      * Default constructor
@@ -50,9 +82,16 @@ public:
      * returns material texture of actor
      */
     Material Texture() const {return material;}
+
+    const std::vector<vertex>* getVerticies(){
+        return &vertices;
+    }
 protected:
     //Material of actor
     Material material;
+
+    //Vertices of the polygon
+    std::vector<vertex> vertices;
 };
 
 

@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
     World world = World::GenerateWorldFromNFF(string(argv[1]));
 
     Pipeline rendering = Pipeline(&world);
-
+    rendering.VertexProcessing();
     //Render the world
     //world.Render(argv[2]);
 
