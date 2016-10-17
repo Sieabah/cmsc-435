@@ -49,6 +49,17 @@ public:
      */
     virtual Vector3D normal(const Vector3D &vec) const;
 
+    virtual void breakIntoTriangles() {
+        if(vertices.size() == 3) return;
+        if(vertices.size() != 4) return;
+
+        vertex one = vertices[0];
+        vertex two = vertices[1];
+        vertex three = vertices[2];
+        vertex four = vertices[3];
+
+        vertices.clear();
+    }
 private:
     //Normal vector
     Vector3D norm;

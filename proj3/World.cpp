@@ -182,31 +182,20 @@ World World::GenerateWorldFromNFF(std::string filepath)
                     //Get vertices count
                     int count;
                     df >> count;
-                    Polygon *poly = new Polygon();
+                    std::vector<Polygon*> polys;
 
-                    //For all vertices
-                    for (int j = 0; j < count; ++j) {
-                        //Holder variables
-                        getline(file, line);
-                        std::istringstream coords(line);
+                    polys = generatePolys(file, line, count);
 
-                        //Create coordinate and read from line
-                        coords >> R;
-                        coords >> G;
-                        coords >> B;
+                    for(std::vector<Polygon*>::iterator it = polys.begin(); it < polys.end(); it++){
+                        //Assign current material to poly actor
+                        (*it)->addMaterial(material);
 
-                        //Add vertex to polygon
-                        poly->addVert(Vector3D(R, G, B));
+                        //Precalculate values for verticies
+                        (*it)->finalize();
+
+                        //Add polygon to world
+                        world.AddActor((*it));
                     }
-
-                    //Assign current material to poly actor
-                    poly->addMaterial(material);
-
-                    //Precalculate values for verticies
-                    poly->finalize();
-
-                    //Add polygon to world
-                    world.AddActor(poly);
                 }
                     break;
 
@@ -264,4 +253,67 @@ ViewDetails * World::getRenderer() {
  */
 void World::AddLight(const Vector3D &light) {
     getRenderer()->AddLight(light);
+}
+
+std::vector<Polygon*> World::generatePolys(std::ifstream &file, std::string &line, int &count) {
+    std::vector<Polygon*> polys;
+
+    if(count == 3) {
+        Polygon *poly = new Polygon();
+
+        //For all vertices
+        for (int j = 0; j < 3; ++j) {
+            //Holder variables
+            getline(file, line);
+            std::istringstream coords(line);
+
+            double X,Y,Z;
+
+            //Create coordinate and read from line
+            coords >> X;
+            coords >> Y;
+            coords >> Z;
+
+            //Add vertex to polygon
+            poly->addVert(Vector3D(X, Y, Z));
+        }
+        polys.push_back(poly);
+    } else if(count == 4){
+        std::vector<Vector3D> vectors;
+
+        //For all vertices
+        for (int j = 0; j < 4; ++j) {
+            //Holder variables
+            getline(file, line);
+            std::istringstream coords(line);
+
+            double X,Y,Z;
+
+            //Create coordinate and read from line
+            coords >> X;
+            coords >> Y;
+            coords >> Z;
+
+            //Add vertex to polygon
+            vectors.push_back(Vector3D(X, Y, Z));
+        }
+
+        Polygon *poly1 = new Polygon();
+        Polygon *poly2 = new Polygon();
+
+        poly1->addVert(vectors[0]);
+        poly1->addVert(vectors[1]);
+        poly1->addVert(vectors[2]);
+
+        poly2->addVert(vectors[0]);
+        poly2->addVert(vectors[2]);
+        poly2->addVert(vectors[3]);
+
+        polys.push_back(poly1);
+        polys.push_back(poly2);
+    } else {
+        std::cout << "ARBITRARY POLYGONS NOT SUPPORTED" << std::endl;
+    }
+
+    return polys;
 }

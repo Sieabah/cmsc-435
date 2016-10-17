@@ -137,7 +137,7 @@ Vector3D ViewDetails::p(double t) {
  * Return point line created between eye and lookat point
  */
 Vector3D ViewDetails::d() {
-    return eye() - s();
+    return (s() - eye()).unit();
 }
 
 /**
@@ -262,21 +262,21 @@ void ViewDetails::Position(Vector3D coord) {
 
 /**
  * w
- * return normalized w-vector
+ * return normalized w-vector LOOK
  */
 Vector3D ViewDetails::w() { return d().unit(); }
 
 /**
  * u
- * return normalized u-vector
+ * return normalized u-vector RIGHT
  */
-Vector3D ViewDetails::u() { return Vector3D::cross(up(), w()); }
+Vector3D ViewDetails::u() { return Vector3D::cross(w(), up()); }
 
 /**
  * v
- * return normalized v-vector
+ * return normalized v-vector UP
  */
-Vector3D ViewDetails::v() { return Vector3D::cross(w(), u()); }
+Vector3D ViewDetails::v() { return Vector3D::cross(u(), w()); }
 
 /**
  * d

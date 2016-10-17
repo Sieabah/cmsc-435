@@ -67,6 +67,10 @@ public:
     double dist();
     double t();
 
+    Vector3D spot(){
+        return lookAt;
+    }
+
     /**
      * Viewing pane variables
      */

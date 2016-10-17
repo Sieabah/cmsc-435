@@ -19,6 +19,8 @@
 #include <string>
 #include <vector>
 
+class Polygon;
+
 class World {
 public:
     //Default constructor
@@ -75,11 +77,14 @@ public:
      * Return pointer to polygons vector
      */
     const std::vector<Actor*> *Actors() const;
+
 private:
     //Polygons in world
     std::vector<Actor*> actors;
     //Camera
     ViewDetails camera;
+
+    static std::vector<Polygon*> generatePolys(std::ifstream &file, std::string &line, int &count);
 };
 
 
