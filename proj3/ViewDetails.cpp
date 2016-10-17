@@ -102,6 +102,12 @@ void ViewDetails::Render(std::string outputFile, const std::vector<Actor*>* acto
     //Given by prompt
     //Open file
     FILE *f = fopen(outputFile.c_str(),"wb");
+
+    //Protect against not being able to write correctly
+    if(f == NULL){
+        std::cout << "Could not open file destination " << outputFile << ". Permissions?" << std::endl;
+        return;
+    }
     //Print information for ppm file
     fprintf(f, "P6\n%d %d\n%d\n", width(), height(), 255);
     //Write the pixel data to the file
