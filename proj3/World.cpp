@@ -191,13 +191,12 @@ World World::GenerateWorldFromNFF(std::string filepath)
                         std::istringstream coords(line);
 
                         //Create coordinate and read from line
-                        Vector3D coord;
-                        coords >> coord.x;
-                        coords >> coord.y;
-                        coords >> coord.z;
+                        coords >> R;
+                        coords >> G;
+                        coords >> B;
 
                         //Add vertex to polygon
-                        poly->addVert(coord);
+                        poly->addVert(Vector3D(R, G, B));
                     }
 
                     //Assign current material to poly actor
