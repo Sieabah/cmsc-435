@@ -192,8 +192,7 @@ unsigned int ViewDetails::width() {
  * Return field of view
  */
 double ViewDetails::FoV() {
-    //Offset by 10 degrees?
-    return fov+10;
+    return fov;
 }
 
 /**

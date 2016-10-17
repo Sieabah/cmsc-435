@@ -28,12 +28,15 @@ protected:
     void GenerateViewMatrix(){
         ViewDetails *view = m_world->getRenderer();
 
-        M_vp(0,0) = (view->width())/2.0;
-        M_vp(1,1) = (view->height())/2.0;
-        M_vp(0,3) = (view->width() - 1.0)/2.0;
-        M_vp(1,3) = (view->height() - 1.0)/2.0;
+        M_vp(0,0) = ((double)view->width())/2.0;
+        M_vp(1,1) = ((double)view->height())/2.0;
+        M_vp(0,3) = ((double)view->width() - 1.0)/2.0;
+        M_vp(1,3) = ((double)view->height() - 1.0)/2.0;
         M_vp(2,2) = 1.0;
         M_vp(3,3) = 1.0;
+
+        std::cout << "ViewMatrix" << std::endl
+                  << M_vp << std::endl;
     }
     void GenerateOrthogonalMatrix(){
         ViewDetails *view = m_world->getRenderer();
@@ -50,6 +53,8 @@ protected:
         M_ortho(2,2) = 2.0/(view->nearPlane()-view->farPlane());
         M_ortho(2,3) = -(view->nearPlane()+view->farPlane())/(view->nearPlane()-view->farPlane());
 
+        std::cout << "Orthogonal" << std::endl
+                  << M_ortho << std::endl;
     }
 
     void GenerateCameraMatrix(){
@@ -59,14 +64,13 @@ protected:
 
         Eigen::Vector3d look(oldLook.x, oldLook.y, oldLook.z);
         //LOOK
-        Eigen::Vector3d w = -look/look.norm();
+        Eigen::Vector3d w = -look.normalized();
 
 
         Eigen::Vector3d upPoint(view->up().x, view->up().y, view->up().z);
-        Eigen::Vector3d t(look.cross(upPoint));
+        Eigen::Vector3d t = look.cross(upPoint);
         //RIGHT
-        Eigen::Vector3d u = t.cross(w);
-                        u = u/u.norm();
+        Eigen::Vector3d u = t.cross(w).normalized();
 
         //UP
         Eigen::Vector3d v = w.cross(u);
@@ -85,37 +89,51 @@ protected:
 
         M_camera(3,3) = 1.0;
 
+        std::cout << "Pre-Eye Camera" << std::endl
+                  << M_camera << std::endl;
+
         Eigen::Matrix4d eye = Eigen::Matrix4d::Identity();
 
         eye(0,3) = -view->eye().x;
         eye(1,3) = -view->eye().y;
         eye(2,3) = -view->eye().z;
 
+        std::cout << "Eye" << std::endl
+                  << eye << std::endl;
 
         M_camera = M_camera * eye;
 
-        std::cout << M_camera << std::endl;
-
+        std::cout << "Camera" << std::endl
+                  << M_camera << std::endl;
     }
 
     void GeneratePerspectiveMatrix(){
         ViewDetails *view = m_world->getRenderer();
 
-        M_persp(0,0) = (2*view->nearPlane())/(view->right()-view->left());
-        M_persp(0,2) = (view->right()+view->left())/(view->left()-view->right());
+        M_persp(0,0) = view->nearPlane();
 
-        M_persp(1,1) = (2*view->nearPlane())/(view->top()-view->bottom());
-        M_persp(1,2) = (view->top()+view->bottom())/(view->bottom()-view->top());
+        M_persp(1,1) = view->nearPlane();
 
+        M_persp(2,2) = view->nearPlane()+view->farPlane();
 
-        M_persp(2,2) = (view->nearPlane() + view->farPlane())/(view->nearPlane()-view->farPlane());
-        M_persp(2,3) = (2*view->farPlane()*view->nearPlane())/(view->farPlane()-view->nearPlane());
+        M_persp(2,3) = -view->farPlane()*view->nearPlane();
 
         M_persp(3,2) = 1.0;
+
+
+        std::cout << "P-Matrix" << std::endl
+                  << M_persp << std::endl;
+
+        M_persp = M_ortho * M_persp;
+
+        std::cout << "Perspective"
+                  << std::endl << M_persp << std::endl;
     }
 public:
 
     Pipeline(World *world): m_world(world){
+        ViewDetails *view = m_world->getRenderer();
+
         M_vp = Eigen::Matrix4d::Zero();
         M_ortho = Eigen::Matrix4d::Zero();
         M_persp = Eigen::Matrix4d::Zero();
@@ -129,7 +147,9 @@ public:
 
         M_matrix = M_vp * M_persp * M_camera;
 
-        std::cout << M_matrix << std::endl;
+        std::cout << "M-Matrix" << std::endl
+                  << M_matrix << std::endl;
+
     }
 
     void VertexProcessing(){
@@ -145,7 +165,6 @@ public:
                 vec(2) = jt->pos.z;
                 vec(3) = 1.0;
                 vec = M_matrix * vec;
-
 
                 //Have to do this to work with windows
                 jt->camera_pos = new Eigen::Vector4d(vec);
@@ -167,10 +186,7 @@ public:
             for (std::vector<vertex>::iterator jt = actor->getVerticies()->begin(); jt < actor->getVerticies()->end(); jt++) {
                 Eigen::Vector4d *vec = jt->camera_pos;
 
-                vec->coeffRef(0,0) = vec->coeffRef(0,0)/ M_matrix(0,3);
-                vec->coeffRef(1,0) = vec->coeffRef(1,0)/ M_matrix(1,3);
-                vec->coeffRef(2,0) = vec->coeffRef(2,0)/ M_matrix(2,3);
-                vec->coeffRef(3,0) = vec->coeffRef(3,0)/ M_matrix(3,3);
+                //std::cout << vec->coeffRef(0) << "/" << M_matrix(0,3) << std::endl;
             }
         }
 
@@ -205,33 +221,34 @@ public:
             //Figure color of the ray
             Color color = Color(actor->Texture().color);
 
-            std::vector<vertex> *verts = (actor->getVerticies());
+            std::vector<vertex> verts = *(actor->getVerticies());
 
             double xValues[] = {
-                    (*verts)[0].camera_pos->coeffRef(0)*view->width(),
-                    (*verts)[1].camera_pos->coeffRef(0)*view->width(),
-                    (*verts)[2].camera_pos->coeffRef(0)*view->width()
+                    verts[0].camera_pos->coeffRef(0)/M_matrix(0,3)*view->width(),
+                    verts[1].camera_pos->coeffRef(0)/M_matrix(0,3)*view->width(),
+                    verts[2].camera_pos->coeffRef(0)/M_matrix(0,3)*view->width()
             };
 
             double yValues[] = {
-                    (*verts)[0].camera_pos->coeffRef(1)*view->height(),
-                    (*verts)[1].camera_pos->coeffRef(1)*view->height(),
-                    (*verts)[2].camera_pos->coeffRef(1)*view->height()
+                    verts[0].camera_pos->coeffRef(1)/M_matrix(1,3)*view->height(),
+                    verts[1].camera_pos->coeffRef(1)/M_matrix(1,3)*view->height(),
+                    verts[2].camera_pos->coeffRef(1)/M_matrix(1,3)*view->height()
             };
 
-            int minX = (int)std::max(0.0, std::min(xValues[0],
+            int minX = (int)std::max((double)0.0, std::min(xValues[0],
                                                    std::min(xValues[1],
                                                             xValues[2])));
             int maxX = (int)std::min((double)view->width(), std::max(xValues[0],
                                                              std::max(xValues[1],
                                                                       xValues[2])));
 
-            int minY = (int)std::max(0.0, std::min(yValues[0],
+            int minY = (int)std::max((double)0.0, std::min(yValues[0],
                                                    std::min(yValues[1],
                                                             yValues[2])));
             int maxY = (int)std::min((double)view->height(), std::max(yValues[0],
                                                              std::max(yValues[1],
                                                                       yValues[2])));
+
 
             for(int y = minY; y < maxY; y++){
                 for(int x = minX; x < maxX; x++){

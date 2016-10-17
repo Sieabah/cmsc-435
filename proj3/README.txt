@@ -1,17 +1,17 @@
 Description:
-This project is a more advanced ray tracer that implents the blinn-phong specular reflection. It only supports polygons, no spheres, cylinders, or other various shapes.
-
-You can uncomment the PrintWorldInformation() to see more detailed information about the world and camera.
+This project is an implementation of the Graphics Pipeline with Vertex Processing, Rasterization, and Blending.
 
 How to use:
 -Compile: make
 
 -To run:
-trace <input nff> <output.ppm>
+pipeline.out <input nff> <output.ppm>
 
 Resources:
 
 Eigen3: http://eigen.tuxfamily.org/
-Book, heavily. Piazza, and email with professor. I didn't use supplied code but modified my previous entry to fix a lot of inheritance I had problems with (logical-wise)
+Utah Graphics Course: https://www.youtube.com/playlist?list=PLTKt9nyqX27zApNcEt5S50nBg8z6LJ1Ye
+
+Book, heavily. Piazza.
 
 Google for various C++ functions and errors that happened in the compiler, mostly irrelevant.
