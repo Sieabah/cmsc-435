@@ -23,6 +23,8 @@ public:
      */
     Polygon(){};
 
+    ~Polygon(){}
+
     /**
      * addMaterial
      * Add material to polygon

@@ -187,18 +187,18 @@ public:
             //Figure color of the ray
             Color color = Color(actor->Texture().color);
 
-            std::vector<vertex> verts = *(actor->getVerticies());
+            std::vector<vertex> *verts = (actor->getVerticies());
 
             double xValues[] = {
-                    verts[0].camera_pos->coeffRef(0)*view->width(),
-                    verts[1].camera_pos->coeffRef(0)*view->width(),
-                    verts[2].camera_pos->coeffRef(0)*view->width()
+                    (*verts)[0].camera_pos->coeffRef(0)*view->width(),
+                    (*verts)[1].camera_pos->coeffRef(0)*view->width(),
+                    (*verts)[2].camera_pos->coeffRef(0)*view->width()
             };
 
             double yValues[] = {
-                    verts[0].camera_pos->coeffRef(1)*view->height(),
-                    verts[1].camera_pos->coeffRef(1)*view->height(),
-                    verts[2].camera_pos->coeffRef(1)*view->height()
+                    (*verts)[0].camera_pos->coeffRef(1)*view->height(),
+                    (*verts)[1].camera_pos->coeffRef(1)*view->height(),
+                    (*verts)[2].camera_pos->coeffRef(1)*view->height()
             };
 
             int minX = (int)std::max(0.0, std::min(xValues[0],
