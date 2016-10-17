@@ -8,6 +8,7 @@
 #include <Eigen/Dense>
 #include <utility>
 #include <algorithm>
+#include <stdio.h>
 #include "World.h"
 #include "ViewDetails.h"
 #include "Actor.h"
@@ -24,8 +25,6 @@ private:
     Eigen::Matrix4d M_matrix;
 
 protected:
-    Pipeline():M_vp(Eigen::Matrix4d::Zero()), M_ortho(Eigen::Matrix4d::Zero()), M_persp(Eigen::Matrix4d::Zero()),
-               M_camera(Eigen::Matrix4d::Zero()), M_matrix(Eigen::Matrix4d::Zero()){}
     void GenerateViewMatrix(){
         std::pair<unsigned int, unsigned int> resolution = m_world->getRenderer()->resolution();
 
@@ -99,6 +98,12 @@ protected:
 public:
 
     Pipeline(World *world): m_world(world){
+        M_vp = Eigen::Matrix4d::Zero();
+        M_ortho = Eigen::Matrix4d::Zero();
+        M_persp = Eigen::Matrix4d::Zero();
+        M_camera = Eigen::Matrix4d::Zero();
+        M_matrix = Eigen::Matrix4d::Zero();
+
         GenerateViewMatrix();
         GenerateOrthogonalMatrix();
         GeneratePerspectiveMatrix();

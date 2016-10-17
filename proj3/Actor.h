@@ -25,12 +25,7 @@ class World;
 class vertex {
 public:
     vertex():camera_pos(NULL){}
-    virtual ~vertex(){
-        if(camera_pos){
-            delete camera_pos;
-            camera_pos = NULL;
-        }
-    }
+    virtual ~vertex(){}
 
     //3D point in space
     Vector3D pos;
