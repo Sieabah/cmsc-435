@@ -24,11 +24,11 @@ class World;
  */
 class vertex {
 public:
-    vertex(){}
+    vertex():camera_pos(NULL){}
     virtual ~vertex(){
         if(camera_pos){
             delete camera_pos;
-            camera_pos = nullptr;
+            camera_pos = NULL;
         }
     }
 
@@ -36,7 +36,7 @@ public:
     Vector3D pos;
 
     //3D point in space
-    Eigen::Vector4d *camera_pos = nullptr;
+    Eigen::Vector4d *camera_pos;
     //Tangent and bitangent of this point
     double tangent, bitangent;
 

@@ -17,13 +17,15 @@
 class Pipeline {
 private:
     World* m_world;
-    Eigen::Matrix4d M_vp = Eigen::Matrix4d::Zero();
-    Eigen::Matrix4d M_ortho = Eigen::Matrix4d::Zero();
-    Eigen::Matrix4d M_persp = Eigen::Matrix4d::Zero();
-    Eigen::Matrix4d M_camera = Eigen::Matrix4d::Zero();
-    Eigen::Matrix4d M_matrix = Eigen::Matrix4d::Zero();
+    Eigen::Matrix4d M_vp;
+    Eigen::Matrix4d M_ortho;
+    Eigen::Matrix4d M_persp;
+    Eigen::Matrix4d M_camera;
+    Eigen::Matrix4d M_matrix;
 
 protected:
+    Pipeline():M_vp(Eigen::Matrix4d::Zero()), M_ortho(Eigen::Matrix4d::Zero()), M_persp(Eigen::Matrix4d::Zero()),
+               M_camera(Eigen::Matrix4d::Zero()), M_matrix(Eigen::Matrix4d::Zero()){}
     void GenerateViewMatrix(){
         std::pair<unsigned int, unsigned int> resolution = m_world->getRenderer()->resolution();
 
@@ -113,7 +115,7 @@ public:
         for(std::vector<Actor*>::const_iterator it = actors->begin(); it < actors->end(); it++){
             Actor *actor = (*it);
 
-            for(auto jt = actor->getVerticies()->begin(); jt < actor->getVerticies()->end(); jt++){
+            for(std::vector<vertex>::iterator jt = actor->getVerticies()->begin(); jt < actor->getVerticies()->end(); jt++){
                 Eigen::Vector4d vec;
                 vec(0) = jt->pos.x;
                 vec(1) = jt->pos.y;
