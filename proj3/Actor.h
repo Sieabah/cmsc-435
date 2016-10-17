@@ -22,12 +22,21 @@ class World;
  * vertex
  * point in space
  */
-struct vertex {
+class vertex {
+public:
+    vertex(){}
+    virtual ~vertex(){
+        if(camera_pos){
+            delete camera_pos;
+            camera_pos = nullptr;
+        }
+    }
+
     //3D point in space
     Vector3D pos;
 
     //3D point in space
-    Eigen::Vector4d camera_pos;
+    Eigen::Vector4d *camera_pos = nullptr;
     //Tangent and bitangent of this point
     double tangent, bitangent;
 
@@ -83,7 +92,7 @@ public:
      */
     Material Texture() const {return material;}
 
-    const std::vector<vertex>* getVerticies(){
+    std::vector<vertex>* getVerticies(){
         return &vertices;
     }
 protected:

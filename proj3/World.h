@@ -28,11 +28,7 @@ public:
     virtual ~World()
     {
         //For all actors
-        while(!actors.empty()){
-            //Delete
-            delete actors.back();
-            actors.pop_back();
-        }
+        actors.clear();
     }
 
     /**

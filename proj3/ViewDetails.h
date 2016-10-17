@@ -110,7 +110,7 @@ public:
     const std::pair<unsigned int, unsigned int> resolution();
 
     double nearPlane(){ return hither; }
-    double farPlane(){ return std::numeric_limits<double>::max(); }
+    double farPlane(){ return 500; }
 private:
     //Lights
     std::vector<Vector3D> lights;

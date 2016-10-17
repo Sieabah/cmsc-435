@@ -11,4 +11,4 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 
 AUX_SOURCE_DIRECTORY(. SOURCE_FILES)
 
-add_executable(proj3 ${SOURCE_FILES})
+add_executable(proj3 ${SOURCE_FILES} Color.h)

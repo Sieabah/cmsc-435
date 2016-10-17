@@ -40,8 +40,19 @@ int main(int argc, char *argv[]) {
     //Create world from NFF file
     World world = World::GenerateWorldFromNFF(string(argv[1]));
 
+    cout << "Pipeline" << endl;
     Pipeline rendering = Pipeline(&world);
+
+    cout << "VertexProcessing" << endl;
     rendering.VertexProcessing();
+
+    cout << "Rasterization" << endl;
+    rendering.Rasterization();
+
+    cout << "Blending" << endl;
+    rendering.Blending(argv[2]);
+
+    cout << "End" << endl;
     //Render the world
     //world.Render(argv[2]);
 
