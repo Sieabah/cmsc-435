@@ -38,21 +38,22 @@ protected:
         std::cout << "ViewMatrix" << std::endl
                   << M_vp << std::endl;
     }
-    void GenerateOrthogonalMatrix(){
+    void GenerateOrthogonalMatrix() {
         ViewDetails *view = m_world->getRenderer();
 
         //X
-        M_ortho(0,0) = 2.0/(view->right()-view->left());
-        M_ortho(0,3) = -(view->right()+view->left())/(view->right()-view->left());
+        M_ortho(0, 0) = 2.0 / (view->right() - view->left());
+        M_ortho(0, 3) = -(view->right() + view->left()) / (view->right() - view->left());
 
         //Y
-        M_ortho(1,1) = 2.0/(view->top()-view->bottom());
-        M_ortho(1,3) = -(view->top()+view->bottom())/(view->top()-view->bottom());
+        M_ortho(1, 1) = 2.0 / (view->top() - view->bottom());
+        M_ortho(1, 3) = -(view->top() + view->bottom()) / (view->top() - view->bottom());
 
         //Z
-        M_ortho(2,2) = 2.0/(view->nearPlane()-view->farPlane());
-        M_ortho(2,3) = -(view->nearPlane()+view->farPlane())/(view->nearPlane()-view->farPlane());
+        M_ortho(2, 2) = 2/(view->nearPlane() - view->farPlane());
+        M_ortho(2, 3) = -(view->nearPlane() + view->farPlane()) / (view->nearPlane() - view->farPlane());
 
+        M_ortho(3, 3) = 1.0;
         std::cout << "Orthogonal" << std::endl
                   << M_ortho << std::endl;
     }
@@ -60,48 +61,50 @@ protected:
     void GenerateCameraMatrix(){
         ViewDetails *view = m_world->getRenderer();
 
-        Vector3D oldLook = view->eye() - view->spot();
+        Eigen::Vector3d eye(view->eye().x, view->eye().y, view->eye().z);
+        Eigen::Vector3d spot(view->spot().x, view->spot().y, view->spot().z);
+        Eigen::Vector3d up(view->up().x, view->up().y, view->up().z);
 
-        Eigen::Vector3d look(oldLook.x, oldLook.y, oldLook.z);
+        Eigen::Vector3d look(spot - eye);
+        Eigen::Vector3d right(look.cross(up));
+        Eigen::Vector3d upVec(right.cross(look));
+
         //LOOK
         Eigen::Vector3d w = -look.normalized();
 
-
-        Eigen::Vector3d upPoint(view->up().x, view->up().y, view->up().z);
-        Eigen::Vector3d t = look.cross(upPoint);
         //RIGHT
-        Eigen::Vector3d u = t.cross(w).normalized();
+        Eigen::Vector3d u = upVec.cross(w).normalized();
 
         //UP
         Eigen::Vector3d v = w.cross(u);
 
-        M_camera(0,0) = view->u().x;
-        M_camera(0,1) = view->u().y;
-        M_camera(0,2) = view->u().z;
+        M_camera(0,0) = u(0);
+        M_camera(0,1) = u(1);
+        M_camera(0,2) = u(2);
 
-        M_camera(1,0) = view->v().x;
-        M_camera(1,1) = view->v().y;
-        M_camera(1,2) = view->v().z;
+        M_camera(1,0) = v(0);
+        M_camera(1,1) = v(1);
+        M_camera(1,2) = v(2);
 
-        M_camera(2,0) = view->w().x;
-        M_camera(2,1) = view->w().y;
-        M_camera(2,2) = view->w().z;
+        M_camera(2,0) = w(0);
+        M_camera(2,1) = w(1);
+        M_camera(2,2) = w(2);
 
         M_camera(3,3) = 1.0;
 
         std::cout << "Pre-Eye Camera" << std::endl
                   << M_camera << std::endl;
 
-        Eigen::Matrix4d eye = Eigen::Matrix4d::Identity();
+        Eigen::Matrix4d eyeMatrix = Eigen::Matrix4d::Identity();
 
-        eye(0,3) = -view->eye().x;
-        eye(1,3) = -view->eye().y;
-        eye(2,3) = -view->eye().z;
+        eyeMatrix(0,3) = -eye(0);
+        eyeMatrix(1,3) = -eye(1);
+        eyeMatrix(2,3) = -eye(2);
 
         std::cout << "Eye" << std::endl
-                  << eye << std::endl;
+                  << eyeMatrix << std::endl;
 
-        M_camera = M_camera * eye;
+        M_camera = M_camera * eyeMatrix;
 
         std::cout << "Camera" << std::endl
                   << M_camera << std::endl;
