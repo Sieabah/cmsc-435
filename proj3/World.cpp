@@ -305,9 +305,9 @@ std::vector<Polygon*> World::generatePolys(std::ifstream &file, std::string &lin
         poly1->addVert(vectors[1]);
         poly1->addVert(vectors[2]);
 
-        poly2->addVert(vectors[0]);
         poly2->addVert(vectors[2]);
         poly2->addVert(vectors[3]);
+        poly2->addVert(vectors[0]);
 
         polys.push_back(poly1);
         polys.push_back(poly2);

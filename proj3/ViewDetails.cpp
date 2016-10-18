@@ -293,7 +293,7 @@ double ViewDetails::t() { return tan(FoV() * PI/360); }
  * top
  * Return distance to top side of viewing pane
  */
-double ViewDetails::top() { return fabs(nearPlane()) * t() * (-1); }
+double ViewDetails::top() { return fabs(nearPlane()) * t() * -1; }
 
 /**
  * bottom

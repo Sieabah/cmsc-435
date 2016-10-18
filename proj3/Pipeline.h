@@ -15,6 +15,11 @@
 #include "Polygon.h"
 #include "Color.h"
 
+#define OUTPUT_Z_BUFFER false
+
+typedef std::vector<std::vector<std::pair<Eigen::Vector3d, double>>> raster;
+typedef std::vector<std::pair<Eigen::Vector3d, double>> pixelPairs;
+
 class Pipeline {
 private:
     World* m_world;
@@ -132,10 +137,22 @@ protected:
         std::cout << "Perspective"
                   << std::endl << M_persp << std::endl;
     }
+
+    //Data array
+    raster pixels;
 public:
 
     Pipeline(World *world): m_world(world){
         ViewDetails *view = m_world->getRenderer();
+
+        pixels.resize(view->height());
+        for(raster::iterator i = pixels.begin(); i < pixels.end(); i++){
+            i->resize(view->width());
+            for(pixelPairs::iterator j = i->begin(); j < i->end(); j++){
+                j->first = Eigen::Vector3d(view->background().x, view->background().y, view->background().z);
+                j->second = view->farPlane();
+            }
+        }
 
         M_vp = Eigen::Matrix4d::Zero();
         M_ortho = Eigen::Matrix4d::Zero();
@@ -171,7 +188,6 @@ public:
 
                 //Have to do this to work with windows
                 jt->camera_pos = new Eigen::Vector4d(vec);
-                //std::cout << *(jt->camera_pos) << std::endl << std::endl;
             }
         }
     }
@@ -180,16 +196,80 @@ public:
         return;
     }
 
+private:
+    double raster_f12(double x, double y, Eigen::Vector3d &xValues, Eigen::Vector3d &yValues){
+        return (yValues[1] - yValues[2])*x + (xValues[2] - xValues[1])*y + xValues[1]*yValues[2] - xValues[2]*yValues[1];
+    }
+    double raster_f20(double x, double y, Eigen::Vector3d &xValues, Eigen::Vector3d &yValues){
+        return (yValues[2] - yValues[0])*x + (xValues[0] - xValues[2])*y + xValues[2]*yValues[0] - xValues[0]*yValues[2];
+    }
+
+    double raster_f01(double x, double y, Eigen::Vector3d &xValues, Eigen::Vector3d &yValues) {
+        return (yValues[0] - yValues[1])*x + (xValues[1] - xValues[0])*y + xValues[0]*yValues[1] - xValues[1]*yValues[0];
+    }
+public:
     void Rasterization(){
+        ViewDetails *view = m_world->getRenderer();
+
         const std::vector<Actor*>* actors = m_world->Actors();
 
         for(std::vector<Actor*>::const_iterator it = actors->begin(); it < actors->end(); it++) {
             Actor *actor = (*it);
 
+            std::vector<vertex> verts = *(actor->getVerticies());
+
+            Eigen::Vector3d xValues = Eigen::Vector3d(
+                    verts[0].camera_pos->coeffRef(0),
+                    verts[1].camera_pos->coeffRef(0),
+                    verts[2].camera_pos->coeffRef(0)
+            );
+
+            Eigen::Vector3d yValues = Eigen::Vector3d(
+                    verts[0].camera_pos->coeffRef(1),
+                    verts[1].camera_pos->coeffRef(1),
+                    verts[2].camera_pos->coeffRef(1)
+            );
+
+            Eigen::Vector3d zValues = Eigen::Vector3d(
+                    verts[0].camera_pos->coeffRef(2),
+                    verts[1].camera_pos->coeffRef(2),
+                    verts[2].camera_pos->coeffRef(2)
+            );
+
+            //Scale
+            xValues = xValues/M_matrix(0,3) * view->width();
+            yValues = yValues/M_matrix(1,3) * view->height();
+
             for (std::vector<vertex>::iterator jt = actor->getVerticies()->begin(); jt < actor->getVerticies()->end(); jt++) {
                 Eigen::Vector4d *vec = jt->camera_pos;
 
-                //std::cout << vec->coeffRef(0) << "/" << M_matrix(0,3) << std::endl;
+                int minX = (int)floor(std::max((double)0.0, xValues.minCoeff()));
+                int maxX = (int)ceil(std::min((double)view->width(), xValues.maxCoeff()));
+
+                int minY = (int)floor(std::max((double)0.0, yValues.minCoeff()));
+                int maxY = (int)ceil(std::min((double)view->height(), yValues.maxCoeff()));
+
+                //Triangle coloring
+                //@todo per-pixel coloring
+                Eigen::Vector3d color(actor->Texture().color.x, actor->Texture().color.y, actor->Texture().color.z);
+
+                for(int y = minY; y < maxY; y++){
+                    for(int x = minX; x < maxX; x++){
+                        double alpha = raster_f12(x,y, xValues, yValues)/raster_f12(xValues(0), yValues(0), xValues, yValues);
+                        double beta = raster_f20(x,y, xValues, yValues)/raster_f20(xValues(1), yValues(1), xValues, yValues);
+                        double gamma = raster_f01(x,y, xValues, yValues)/raster_f01(xValues(2), yValues(2), xValues, yValues);
+
+                        if(alpha > 0 && beta > 0 && gamma > 0) {
+                            double zbuffer = zValues[0] * alpha + zValues[1] * beta + zValues[2] * gamma;
+
+                            if(zbuffer < pixels[y][x].second) {
+                                // assign color
+                                pixels[y][x].first = color;
+                                pixels[y][x].second = zbuffer;
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -203,68 +283,35 @@ public:
     void Blending(std::string outputFile){
         ViewDetails *view = m_world->getRenderer();
 
-        //Data array
-        unsigned char pixels[view->height()][view->width()][3];
+        unsigned char output[view->width()][view->height()][3];
 
-        Color bgColor = Color(view->background());
-        for(int y = 0; y < view->height(); y++){
-            for(int x = 0; x < view->width(); x++){
-                // assign color
-                pixels[y][x][0] = bgColor.R;
-                pixels[y][x][1] = bgColor.G;
-                pixels[y][x][2] = bgColor.B;
+        double maxZ, minZ = maxZ = view->nearPlane();
+        if(OUTPUT_Z_BUFFER) {
+            for (int y = 0; y < view->height(); y++) {
+                for (int x = 0; x < view->width(); x++) {
+                    if (pixels[y][x].second > maxZ && pixels[y][x].second != view->farPlane())
+                        maxZ = pixels[y][x].second;
+                    if (pixels[y][x].second < minZ)
+                        minZ = pixels[y][x].second;
+                }
             }
         }
 
-        const std::vector<Actor*>* actors = m_world->Actors();
+        for(int y = 0; y < view->height(); y++){
+            for(int x = 0; x < view->width(); x++){
 
-        for(std::vector<Actor*>::const_iterator it = actors->begin(); it < actors->end(); it++) {
-            Actor *actor = (*it);
+                if(OUTPUT_Z_BUFFER){
+                    output[y][x][0] = Color::Convert((pixels[y][x].second-minZ)/maxZ);
+                    if(pixels[y][x].second == view->farPlane())
+                        pixels[y][x].second = minZ;
+                    output[y][x][1] = Color::Convert((pixels[y][x].second-minZ)/maxZ);
+                    output[y][x][2] = Color::Convert((pixels[y][x].second-minZ)/maxZ);
+                } else {
+                    Color color(pixels[y][x].first);
 
-            //Figure color of the ray
-            Color color = Color(actor->Texture().color);
-
-            std::vector<vertex> verts = *(actor->getVerticies());
-
-            double xValues[] = {
-                    verts[0].camera_pos->coeffRef(0)/M_matrix(0,3)*view->width(),
-                    verts[1].camera_pos->coeffRef(0)/M_matrix(0,3)*view->width(),
-                    verts[2].camera_pos->coeffRef(0)/M_matrix(0,3)*view->width()
-            };
-
-            double yValues[] = {
-                    verts[0].camera_pos->coeffRef(1)/M_matrix(1,3)*view->height(),
-                    verts[1].camera_pos->coeffRef(1)/M_matrix(1,3)*view->height(),
-                    verts[2].camera_pos->coeffRef(1)/M_matrix(1,3)*view->height()
-            };
-
-            int minX = (int)std::max((double)0.0, std::min(xValues[0],
-                                                   std::min(xValues[1],
-                                                            xValues[2])));
-            int maxX = (int)std::min((double)view->width(), std::max(xValues[0],
-                                                             std::max(xValues[1],
-                                                                      xValues[2])));
-
-            int minY = (int)std::max((double)0.0, std::min(yValues[0],
-                                                   std::min(yValues[1],
-                                                            yValues[2])));
-            int maxY = (int)std::min((double)view->height(), std::max(yValues[0],
-                                                             std::max(yValues[1],
-                                                                      yValues[2])));
-
-
-            for(int y = minY; y < maxY; y++){
-                for(int x = minX; x < maxX; x++){
-                    double alpha = (yValues[1] - yValues[2])*x + (xValues[2] - xValues[1])*y + xValues[1]*yValues[2] - xValues[2]*yValues[1];
-                    double beta = (yValues[2] - yValues[0])*x + (xValues[0] - xValues[2])*y + xValues[2]*yValues[0] - xValues[0]*yValues[2];
-                    double gamma = (yValues[0] - yValues[1])*x + (xValues[1] - xValues[0])*y + xValues[0]*yValues[1] - xValues[1]*yValues[0];
-
-                    if(alpha > 0 && beta > 0 && gamma > 0) {
-                        // assign color
-                        pixels[y][x][0] = color.R;
-                        pixels[y][x][1] = color.G;
-                        pixels[y][x][2] = color.B;
-                    }
+                    output[y][x][0] = color.R;
+                    output[y][x][1] = color.G;
+                    output[y][x][2] = color.B;
                 }
             }
         }
@@ -275,7 +322,7 @@ public:
         //Print information for ppm file
         fprintf(f, "P6\n%d %d\n%d\n", view->width(), view->height(), 255);
         //Write the pixel data to the file
-        fwrite(pixels, 1, view->height()*view->width()*3, f);
+        fwrite(output, 1, view->height()*view->width()*3, f);
         //Close the file
         fclose(f);
     }
