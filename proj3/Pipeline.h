@@ -15,7 +15,7 @@
 #include "Polygon.h"
 #include "Color.h"
 
-#define OUTPUT_Z_BUFFER false
+const bool OUTPUT_Z_BUFFER = false;
 
 typedef std::vector<std::vector<std::pair<Eigen::Vector3d, double>>> raster;
 typedef std::vector<std::pair<Eigen::Vector3d, double>> pixelPairs;
@@ -264,6 +264,8 @@ public:
 
                             if(zbuffer < pixels[y][x].second) {
                                 // assign color
+                                //Trippy Color Assignment
+                                //pixels[y][x].first = Eigen::Vector3d(color(0)*alpha, color(1)*beta, color(2)*gamma);
                                 pixels[y][x].first = color;
                                 pixels[y][x].second = zbuffer;
                             }
