@@ -179,11 +179,7 @@ public:
             Actor *actor = (*it);
 
             for(std::vector<vertex>::iterator jt = actor->getVerticies()->begin(); jt < actor->getVerticies()->end(); jt++){
-                Eigen::Vector4d vec;
-                vec(0) = jt->pos.x;
-                vec(1) = jt->pos.y;
-                vec(2) = jt->pos.z;
-                vec(3) = 1.0;
+                Eigen::Vector4d vec(jt->pos.x, jt->pos.y, jt->pos.z, 1.0);
                 vec = M_matrix * vec;
 
                 //Have to do this to work with windows
