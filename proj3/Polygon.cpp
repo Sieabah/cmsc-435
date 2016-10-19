@@ -40,51 +40,6 @@ Vector3D Polygon::normal(const Vector3D &vec) const {
 }
 
 /**
- * intersect
- * Detect if ray intersects within poly
- */
-const Hit Polygon::intersect(const Ray &ray) const {
-    //Find exact distance of the ray to the poly
-    double distance = (vecNormal - Vector3D::dot(norm, ray.pos())) / Vector3D::dot(norm, ray.dir());
-
-    //If distance is outside of ray plane, no hit
-    if(distance < ray.near() || distance > ray.far())
-        return Hit();
-
-    //Determine point
-    Vector3D point = ray.pos() + ray.dir() * distance;
-
-    //Find tangent and bitangent
-    double pointTangent = Vector3D::dot(point, tangent);
-    double pointBitangent = Vector3D::dot(point, bitangent);
-
-    bool inside = false;
-
-    //Iterate over all vertices, determining if ray is inside the two points
-    std::vector<vertex>::const_iterator vert0, vert1;
-    for(vert1 = vertices.begin(), vert0 = vert1++; vert1 != vertices.end(); vert0 = vert1, ++vert1)
-    {
-        double point1 = vert1->bitangent - pointBitangent;
-        double point2 = pointBitangent - vert0->bitangent;
-
-        if((point1 > 0) != (point2 < 0))
-        {
-            double q_tangent = (point1 * vert0->tangent + point2 * vert1->tangent)/
-                    (vert1->bitangent - vert0->bitangent);
-
-            if(q_tangent > pointTangent)
-                inside = !inside;
-        }
-    }
-
-    //If determined to be inside, create hit object
-    if (inside) return Hit(this, distance, ray);
-
-    //Ohterwise no hit generated
-    return Hit();
-}
-
-/**
  * addMaterial
  * Add material to polygon
  */

@@ -21,6 +21,7 @@
 #include <vector>
 #include <iostream>
 #include <utility>
+#include <Eigen/Dense>
 
 class World;
 
@@ -55,20 +56,19 @@ public:
     /**
      * Variables from the book
      */
-    Vector3D eye();
-    Vector3D s();
-    Vector3D d();
-    Vector3D p(double t);
-    Vector3D up();
-    //Camera axis variables
-    Vector3D w();
-    Vector3D u();
-    Vector3D v();
-    double dist();
+    Eigen::Vector3d eye();
+    Eigen::Vector3d look(){ return Eigen::Vector3d(spot() - eye()); }
+    Eigen::Vector3d rightVec(){ return look().cross(upPoint()); }
+    Eigen::Vector3d up(){ return rightVec().cross(look()); }
+    Eigen::Vector3d upPoint(){ return Eigen::Vector3d(upVector.x, upVector.y, upVector.z); }
+    Eigen::Vector3d w(){ return look().normalized() * -1; }
+    Eigen::Vector3d u(){ return up().cross(w()).normalized(); }
+    Eigen::Vector3d v(){ return w().cross(u()); }
+
     double t();
 
-    Vector3D spot(){
-        return lookAt;
+    Eigen::Vector3d spot(){
+        return Eigen::Vector3d(lookAt.x, lookAt.y, lookAt.z);
     }
 
     /**
@@ -86,30 +86,10 @@ public:
     void PrintRenderInformation();
 
     /**
-     * Render
-     * outputFile - The output file to write pixel data to
-     * polys - All the polygons in the world to ray-trace
-     * printout - Print to console or write to file
-     */
-    void Render(std::string outputFile, const std::vector<Actor *>* actors, World &world, bool printout=false);
-
-    /**
      * AddLight
      * Add light to scene
      */
     void AddLight(Vector3D light);
-
-    /**
-     * CalcLighting
-     * Calculate lighting of material, position, direction, and set of actors
-     */
-    Vector3D CalcLighting(Material material, Vector3D pos, Vector3D dir, Vector3D N, const std::vector<Actor*> *actors) const;
-
-    /**
-     * trace
-     * Ray-Trace ray vector given set of actors
-     */
-    const Hit trace(Ray r, const std::vector<Actor*> *actors) const;
 
     double nearPlane(){ return hither; }
     double farPlane(){ return nearPlane()*1000; }

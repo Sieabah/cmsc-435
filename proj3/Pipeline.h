@@ -66,22 +66,14 @@ protected:
     void GenerateCameraMatrix(){
         ViewDetails *view = m_world->getRenderer();
 
-        Eigen::Vector3d eye(view->eye().x, view->eye().y, view->eye().z);
-        Eigen::Vector3d spot(view->spot().x, view->spot().y, view->spot().z);
-        Eigen::Vector3d up(view->up().x, view->up().y, view->up().z);
-
-        Eigen::Vector3d look(spot - eye);
-        Eigen::Vector3d right(look.cross(up));
-        Eigen::Vector3d upVec(right.cross(look));
-
         //LOOK
-        Eigen::Vector3d w = -look.normalized();
+        Eigen::Vector3d w = view->w();
 
         //RIGHT
-        Eigen::Vector3d u = upVec.cross(w).normalized();
+        Eigen::Vector3d u = view->u();
 
         //UP
-        Eigen::Vector3d v = w.cross(u);
+        Eigen::Vector3d v = view->v();
 
         M_camera(0,0) = u(0);
         M_camera(0,1) = u(1);
@@ -102,9 +94,9 @@ protected:
 
         Eigen::Matrix4d eyeMatrix = Eigen::Matrix4d::Identity();
 
-        eyeMatrix(0,3) = -eye(0);
-        eyeMatrix(1,3) = -eye(1);
-        eyeMatrix(2,3) = -eye(2);
+        eyeMatrix(0,3) = -view->eye()(0);
+        eyeMatrix(1,3) = -view->eye()(1);
+        eyeMatrix(2,3) = -view->eye()(2);
 
         std::cout << "Eye" << std::endl
                   << eyeMatrix << std::endl;

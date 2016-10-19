@@ -43,16 +43,14 @@ void ViewDetails::PrintRenderInformation()
     std::cout << "Resolution: " << resX << "x" << resY << std::endl;
 
     std::cout << "View Variables: " << std::endl;
-    std::cout << "\te: " << eye() << std::endl;
-    std::cout << "\ts: " << s() << std::endl;
-    std::cout << "\td: " << d() << std::endl;
+    std::cout << "\te: " << eye()(0) << "," << eye()(1) << "," << eye()(2) << std::endl;
+    std::cout << "\tu: " << u()(0) << ", " << u()(1) << ", " << u()(2) << std::endl;
+    std::cout << "\tv: " << v()(0) << ", " << v()(1) << ", " << v()(2) << std::endl;
+    std::cout << "\tw: " << w()(0) << ", " << w()(1) << ", " << w()(2) << std::endl;
 
-    std::cout << "\tp(0): " << p(0) << std::endl;
-    std::cout << "\tp(1): " << p(1) << std::endl;
-
-    std::cout << "\tw: " << w() << std::endl;
-    std::cout << "\tu: " << u() << std::endl;
-    std::cout << "\tv: " << v() << std::endl;
+    //std::cout << "\tw: " << w() << std::endl;
+    //std::cout << "\tu: " << u() << std::endl;
+    //std::cout << "\tv: " << v() << std::endl;
 
     std::cout << "\tt: " << t() << std::endl;
 
@@ -63,97 +61,11 @@ void ViewDetails::PrintRenderInformation()
 }
 
 /**
- * Render
- * render image to screen with given actors and world
- */
-void ViewDetails::Render(std::string outputFile, const std::vector<Actor*>* actors, World &world, bool printout) {
-
-    //Data array
-    unsigned char pixels[height()][width()][3];
-
-    //For each row
-    for(int hPixel =0; hPixel <height(); ++hPixel) {
-
-        if (hPixel % (height() / 25) == 0)
-            printf("%d%%...", (100* hPixel)/height());
-
-        //For each column
-        for(int wPixel =0; wPixel <width(); ++wPixel) {
-            // trace new ray (Equations from book)
-            double us = left() + (right() - left()) * (wPixel +0.5)/width();
-            double vs = top() + (bottom() - top()) * (hPixel +0.5)/height();
-
-            //Ray direction
-            Vector3D dir = w() * -dist() + u() * us + v() * vs;
-
-            //Generate ray
-            Ray ray(eye(), dir, hither / dist());
-
-            //Figure color of the ray
-            Color color = Color(trace(ray, actors).color(world));
-
-            // assign color
-            pixels[hPixel][wPixel][0] = color.R;
-            pixels[hPixel][wPixel][1] = color.G;
-            pixels[hPixel][wPixel][2] = color.B;
-        }
-    }
-
-    //Given by prompt
-    //Open file
-    FILE *f = fopen(outputFile.c_str(),"wb");
-
-    //Protect against not being able to write correctly
-    if(f == NULL){
-        std::cout << "Could not open file destination " << outputFile << ". Permissions?" << std::endl;
-        return;
-    }
-    //Print information for ppm file
-    fprintf(f, "P6\n%d %d\n%d\n", width(), height(), 255);
-    //Write the pixel data to the file
-    fwrite(pixels, 1, height()*width()*3, f);
-    //Close the file
-    fclose(f);
-}
-
-/**
- * up()
- * Return up vector
- */
-Vector3D ViewDetails::up() {
-    return upVector;
-}
-
-/**
- * p
- * Return point on line created between eye and lookat point
- */
-Vector3D ViewDetails::p(double t) {
-    return eye() + (d() * t);
-}
-
-/**
- * d
- * Return point line created between eye and lookat point
- */
-Vector3D ViewDetails::d() {
-    return (s() - eye()).unit();
-}
-
-/**
- * s
- * Return lookat point
- */
-Vector3D ViewDetails::s() {
-    return lookAt;
-}
-
-/**
  * eye
  * Return camera position
  */
-Vector3D ViewDetails::eye() {
-    return position;
+Eigen::Vector3d ViewDetails::eye() {
+    return Eigen::Vector3d(position.x, position.y, position.z);
 }
 
 /**
@@ -260,30 +172,6 @@ void ViewDetails::Position(Vector3D coord) {
 }
 
 /**
- * w
- * return normalized w-vector LOOK
- */
-Vector3D ViewDetails::w() { return d().unit(); }
-
-/**
- * u
- * return normalized u-vector RIGHT
- */
-Vector3D ViewDetails::u() { return Vector3D::cross(w(), up()); }
-
-/**
- * v
- * return normalized v-vector UP
- */
-Vector3D ViewDetails::v() { return Vector3D::cross(u(), w()); }
-
-/**
- * d
- * Return distance to viewing pane/
- */
-double ViewDetails::dist() { return d().magnitude(); }
-
-/**
  * t
  * return t-value to viewing pane
  */
@@ -325,7 +213,7 @@ void ViewDetails::AddLight(Vector3D light) {
  * CalcLighting
  * Calculate lighting of material, position, direction, normal vector given an array of vectors
  */
-Vector3D ViewDetails::CalcLighting(Material material, Vector3D pos, Vector3D dir, Vector3D N, const std::vector<Actor*> *actors) const {
+/*Vector3D ViewDetails::CalcLighting(Material material, Vector3D pos, Vector3D dir, Vector3D N, const std::vector<Actor*> *actors) const {
     Vector3D color(0,0,0);
 
     //Precalculate intentity of lights
@@ -371,12 +259,13 @@ Vector3D ViewDetails::CalcLighting(Material material, Vector3D pos, Vector3D dir
     }
 
     return color;
-}
+}*/
 
 /**
  * trace
  * Ray-Trace given a set of actors
  */
+/*
 const Hit ViewDetails::trace(Ray r, const std::vector<Actor*> *actors) const {
 
     //Closest hit = null(essentially)
@@ -399,4 +288,59 @@ const Hit ViewDetails::trace(Ray r, const std::vector<Actor*> *actors) const {
     }
 
     return closest;
-}
+}*/
+
+/**
+ * Render
+ * render image to screen with given actors and world
+ */
+/*
+void ViewDetails::Render(std::string outputFile, const std::vector<Actor*>* actors, World &world, bool printout) {
+
+    //Data array
+    unsigned char pixels[height()][width()][3];
+
+    //For each row
+    for(int hPixel =0; hPixel <height(); ++hPixel) {
+
+        if (hPixel % (height() / 25) == 0)
+            printf("%d%%...", (100* hPixel)/height());
+
+        //For each column
+        for(int wPixel =0; wPixel <width(); ++wPixel) {
+            // trace new ray (Equations from book)
+            double us = left() + (right() - left()) * (wPixel +0.5)/width();
+            double vs = top() + (bottom() - top()) * (hPixel +0.5)/height();
+
+            //Ray direction
+            Vector3D dir = w() * -dist() + u() * us + v() * vs;
+
+            //Generate ray
+            Ray ray(eye(), dir, hither / dist());
+
+            //Figure color of the ray
+            Color color = Color(trace(ray, actors).color(world));
+
+            // assign color
+            pixels[hPixel][wPixel][0] = color.R;
+            pixels[hPixel][wPixel][1] = color.G;
+            pixels[hPixel][wPixel][2] = color.B;
+        }
+    }
+
+    //Given by prompt
+    //Open file
+    FILE *f = fopen(outputFile.c_str(),"wb");
+
+    //Protect against not being able to write correctly
+    if(f == NULL){
+        std::cout << "Could not open file destination " << outputFile << ". Permissions?" << std::endl;
+        return;
+    }
+    //Print information for ppm file
+    fprintf(f, "P6\n%d %d\n%d\n", width(), height(), 255);
+    //Write the pixel data to the file
+    fwrite(pixels, 1, height()*width()*3, f);
+    //Close the file
+    fclose(f);
+}*/

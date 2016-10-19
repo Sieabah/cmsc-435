@@ -32,12 +32,6 @@ public:
     void addMaterial(Material &mat);
 
     /**
-     * intersect
-     * Find if ray intersects with polygon
-     */
-    virtual const Hit intersect(const Ray &ray) const;
-
-    /**
      * finalize
      * precalculate values for hit detection
      */

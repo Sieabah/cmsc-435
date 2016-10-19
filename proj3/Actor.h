@@ -11,7 +11,6 @@
 
 #include <vector>
 
-#include "Hit.h"
 #include "Material.h"
 #include <Eigen/Dense>
 
@@ -68,12 +67,6 @@ public:
      * Virtual destructor
      */
     virtual ~Actor(){};
-
-    /**
-     * intersect
-     * abstract function to determine if actor has been hit by given ray
-     */
-    virtual const Hit intersect(const Ray &ray) const = 0;
 
     /**
      * normal

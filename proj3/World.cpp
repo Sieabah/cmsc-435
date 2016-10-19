@@ -221,16 +221,6 @@ const std::vector<Actor*> * World::Actors() const {
 }
 
 /**
- * Render
- * Pass the variable to the camera render
- */
-void World::Render(std::string outputFile, bool printout) {
-    //Sorry didn't have time to implement this
-    printout = false;
-    camera.Render(outputFile, Actors(), *this, printout);
-}
-
-/**
  * AddPoly
  * Add polygon to vector
  */

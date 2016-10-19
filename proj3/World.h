@@ -13,7 +13,6 @@
 #include "Vector3D.h"
 
 #include "ViewDetails.h"
-#include "Hit.h"
 #include "Ray.h"
 
 #include <string>
@@ -65,12 +64,6 @@ public:
      * Generate a world object from a NFF file
      */
     static bool GenerateWorldFromNFF(std::string filepath, World &world);
-
-    /**
-     * Render
-     * outputFile - filename to write to
-     */
-    void Render(std::string outputFile, bool printout=false);
 
     /**
      * Polys
