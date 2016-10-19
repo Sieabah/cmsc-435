@@ -103,11 +103,8 @@ protected:
 
         Eigen::Vector3d normal = eV.cross(eW);
 
-        if(normal.dot(p1) > 0){
-            return true;
-        }
+        return normal.dot(p1) > 0;
 
-        return false;
     }
     std::vector<Actor*> VertexProcessing(){
         if(DEBUG_OUTPUT)
@@ -160,6 +157,10 @@ private:
     }
 
 protected:
+    struct Fragment{
+
+    };
+
     void Rasterization(std::vector<Actor*> actors){
         if(DEBUG_OUTPUT)
             std::cout << "Rasterization" << std::endl;
@@ -210,24 +211,24 @@ protected:
             Eigen::Vector3d color;
 
             Vector3D V = verts[1].pos - verts[0].pos;
-            Vector3D W = verts[3].pos - verts[0].pos;
+            Vector3D W = verts[2].pos - verts[0].pos;
 
             Eigen::Vector3d eV(V.x, V.y, V.z);
             Eigen::Vector3d eW(W.x, W.y, W.z);
 
-            Eigen::Vector3d normal = eV.cross(eW).normalized();
+            Eigen::Vector3d normal = eV.cross(eW);
 
             if(lights->size() > 0){
                 Eigen::Vector3d resultColor(0, 0, 0);
 
                 Eigen::Vector3d facePosition(verts[0].pos.x, verts[0].pos.y, verts[0].pos.z);
 
-                for(auto light = lights->begin(); light < lights->end(); light++){
-                    Eigen::Vector4d result = light->GetColor(facePosition, normal, actor->Texture());
+                for(std::vector<Light>::const_iterator light = lights->begin(); light < lights->end(); light++){
+                    Eigen::Vector3d result = light->GetColor(facePosition, view->eye(), normal, actor->Texture(), light->position());
 
-                    resultColor(0) += result(0) > 0 ? result(0) : 0;
-                    resultColor(1) += result(1) > 0 ? result(1) : 0;
-                    resultColor(2) += result(2) > 0 ? result(2) : 0;
+                    resultColor(0) += std::max(result(0),0.0);
+                    resultColor(1) += std::max(result(1),0.0);
+                    resultColor(2) += std::max(result(2),0.0);
                 }
 
                 color = resultColor;
@@ -287,7 +288,6 @@ public:
 
 protected:
 
-    void th(){}
     void Save(std::string outputFile){
         if(DEBUG_OUTPUT)
             std::cout << "Saving to file " << outputFile << std::endl;

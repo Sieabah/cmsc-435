@@ -15,8 +15,8 @@
 
 using namespace std;
 
-const bool OUTPUT_ZBUFFER = true;
-const bool DEBUG = false;
+const bool OUTPUT_ZBUFFER = false;
+const bool DEBUG = true;
 const bool CULLING_ENABLED = false;
 
 /**

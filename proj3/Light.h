@@ -26,11 +26,15 @@ public:
     Light(Eigen::Vector3d pos = Eigen::Vector3d(0,0,0), double light_intensity = 1):m_position(pos), m_intensity(light_intensity){
     }
 
-    Eigen::Vector4d GetColor(Eigen::Vector3d pos, Eigen::Vector3d normal, Material material) const{
-        Eigen::Vector4d color(0,0,0,0);
+    Eigen::Vector3d GetColor(Eigen::Vector3d pointPos, Eigen::Vector3d look, Eigen::Vector3d normal, Material material, Eigen::Vector3d lightPos) const{
+        Eigen::Vector3d color(0,0,0);
 
-        double channel = material.shader.Kd * m_intensity;
-        double bias = (position() - pos).normalized().dot(normal);
+        double channel = material.shader.Kd * intensity();
+
+        Eigen::Vector3d I = lightPos-pointPos;
+        Eigen::Vector3d v = look-pointPos;
+
+        double bias = (I).normalized().dot(normal.normalized());
 
         color(0) = material.color.x * channel*bias;
         color(1) = material.color.y * channel*bias;
