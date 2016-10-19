@@ -113,6 +113,13 @@ public:
 
     double nearPlane(){ return hither; }
     double farPlane(){ return nearPlane()*1000; }
+
+    const Vector3D *getLight(int index){
+        if(index >= lights.size() || index < 0)
+            return NULL;
+
+        return &lights[index];
+    }
 private:
     //Lights
     std::vector<Vector3D> lights;
