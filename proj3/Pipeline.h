@@ -38,9 +38,8 @@ struct Fragment{
 
 enum LIGHTING{ FLAT, PHONG };
 
-typedef std::vector<std::vector<Fragment>> raster;
-typedef std::vector<std::vector<Fragment>> fragmentCollection;
-typedef std::vector<fragmentCollection> fragmentRaster;
+typedef std::vector<std::vector<Fragment> > raster;
+typedef std::vector<raster> fragmentRaster;
 
 class Pipeline {
 private:
