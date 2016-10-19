@@ -16,7 +16,9 @@
 #include "Color.h"
 
 struct Fragment{
-    Fragment(){}
+    Fragment(){
+        zbuffer = 0;
+    }
 
     Eigen::Vector3d xValues;
     Eigen::Vector3d yValues;
@@ -31,7 +33,7 @@ struct Fragment{
     double gamma;
 
     std::vector<vertex> verts;
-    double zbuffer = 0;
+    double zbuffer;
 };
 
 enum LIGHTING{ FLAT, PHONG };
@@ -54,6 +56,10 @@ private:
     const bool CULL_ENABLED;
     LIGHTING LIGHTING_TYPE;
 
+    bool zBuffer_set;
+    double zBuffer_min;
+    double zBuffer_max;
+
 protected:
     void GenerateViewMatrix();
     void GenerateOrthogonalMatrix();
@@ -68,7 +74,9 @@ public:
         if(DEBUG_OUTPUT)
             std::cout << "Pipeline" << std::endl;
 
-        ViewDetails *view = m_world->getRenderer();
+        zBuffer_min = 0;
+        zBuffer_max = 0;
+        zBuffer_set = false;
     }
 
     void run(std::string outputFile) {
@@ -90,6 +98,12 @@ public:
         raster Raster = Blending(fragments);
 
         Save(outputFile, Raster);
+    }
+
+    void defineZBuffer(double min, double max){
+        zBuffer_max = max;
+        zBuffer_min = min;
+        zBuffer_set = true;
     }
 protected:
 
@@ -332,10 +346,11 @@ protected:
         for(int y = 0; y < view->height(); y++){
             for(int x = 0; x < view->width(); x++) {
                 Raster[y][x].zbuffer = view->farPlane();
+
                 if(fragments[y][x].size() == 0){
                     Raster[y][x].color = Eigen::Vector3d(view->background().x, view->background().y, view->background().z);
                 } else {
-                    for(auto fragment = fragments[y][x].begin(); fragment < fragments[y][x].end(); fragment++){
+                    for(std::vector<Fragment>::iterator fragment = fragments[y][x].begin(); fragment < fragments[y][x].end(); fragment++){
                         if(fragment->zbuffer < Raster[y][x].zbuffer)
                             Raster[y][x] = *fragment;
                     }
@@ -344,17 +359,6 @@ protected:
         }
 
         return Raster;
-    }
-
-private:
-    bool zBuffer_set = false;
-    double zBuffer_min = 0;
-    double zBuffer_max = 0;
-public:
-    void defineZBuffer(double min, double max){
-        zBuffer_max = max;
-        zBuffer_min = min;
-        zBuffer_set = true;
     }
 
 protected:

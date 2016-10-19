@@ -20,7 +20,9 @@ public:
         return m_intensity;
     }
 
-    Light(double x, double y, double z, double light_intensity = 1):Light(Eigen::Vector3d(x,y,z), light_intensity){
+    Light(double x, double y, double z, double light_intensity = 1){
+        m_position = Eigen::Vector3d(x,y,z);
+        m_intensity = light_intensity;
     }
 
     Light(Eigen::Vector3d pos = Eigen::Vector3d(0,0,0), double light_intensity = 1):m_position(pos), m_intensity(light_intensity){
