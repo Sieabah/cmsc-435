@@ -96,7 +96,7 @@ bool World::GenerateWorldFromNFF(std::string filepath, World &world)
                         case 'f':
                             parameter >> R; parameter >> G; parameter >> B;
                             //Update camera position
-                            world.getRenderer()->Position(Vector3D(R,G,B));
+                            world.getRenderer()->Position(Eigen::Vector3d(R,G,B));
                             break;
 
                         //Look at vector & fov
@@ -106,7 +106,7 @@ bool World::GenerateWorldFromNFF(std::string filepath, World &world)
                             {
                                 parameter >> R; parameter >> G; parameter >> B;
                                 //Update look-at vector
-                                world.getRenderer()->LookVec(Vector3D(R,G,B));
+                                world.getRenderer()->LookVec(Eigen::Vector3d(R,G,B));
                             }
                             //aN
                             else
@@ -122,7 +122,7 @@ bool World::GenerateWorldFromNFF(std::string filepath, World &world)
                             parameter >> R; parameter >> G; parameter >> B;
 
                             //Update up vector
-                            world.getRenderer()->UpVec(Vector3D(R,G,B));
+                            world.getRenderer()->UpVec(Eigen::Vector3d(R,G,B));
                             break;
 
                         //Hither value
@@ -150,7 +150,7 @@ bool World::GenerateWorldFromNFF(std::string filepath, World &world)
             //Light
             case 'l':
                 df >> R; df >> G; df >> B;
-                world.AddLight(Vector3D(R,G,B));
+                world.AddLight(Eigen::Vector3d(R,G,B));
                 break;
 
             //Handle Fill color and shader
@@ -169,10 +169,10 @@ bool World::GenerateWorldFromNFF(std::string filepath, World &world)
                 df >> shader.index_of_refraction;
 
                 //Update shader and fill color
-                world.getRenderer()->Fill(Vector3D(R, G, B));
+                world.getRenderer()->Fill(Eigen::Vector3d(R, G, B));
 
                 //Update the material we're assigning to Actors
-                material = Material(Vector3D(R, G, B), shader);
+                material = Material(Eigen::Vector3d(R, G, B), shader);
             }
                 break;
 
@@ -241,7 +241,7 @@ ViewDetails * World::getRenderer() {
  * AddLight
  * Adds light to world
  */
-void World::AddLight(const Vector3D &light) {
+void World::AddLight(const Eigen::Vector3d &light) {
     getRenderer()->AddLight(light);
 }
 
@@ -265,11 +265,11 @@ std::vector<Polygon*> World::generatePolys(std::ifstream &file, std::string &lin
             coords >> Z;
 
             //Add vertex to polygon
-            poly->addVert(Vector3D(X, Y, Z));
+            poly->addVert(Eigen::Vector3d(X, Y, Z));
         }
         polys.push_back(poly);
     } else if(count == 4){
-        std::vector<Vector3D> vectors;
+        std::vector<Eigen::Vector3d> vectors;
 
         //For all vertices
         for (int j = 0; j < 4; ++j) {
@@ -285,7 +285,7 @@ std::vector<Polygon*> World::generatePolys(std::ifstream &file, std::string &lin
             coords >> Z;
 
             //Add vertex to polygon
-            vectors.push_back(Vector3D(X, Y, Z));
+            vectors.push_back(Eigen::Vector3d(X, Y, Z));
         }
 
         Polygon *poly1 = new Polygon();

@@ -11,7 +11,7 @@
 #define RAYTRACER_POLYGON_H
 
 #include <vector>
-#include "Vector3D.h"
+#include <Eigen/Dense>
 #include "Actor.h"
 #include "Ray.h"
 
@@ -29,38 +29,16 @@ public:
      * addMaterial
      * Add material to polygon
      */
-    void addMaterial(Material &mat);
-
-    /**
-     * finalize
-     * precalculate values for hit detection
-     */
-    void finalize();
-
-    /**
-     * normal
-     * returns normal vector relative to given vector
-     */
-    virtual Vector3D normal(const Vector3D &vec) const;
-
-    virtual void breakIntoTriangles() {
-        if(vertices.size() == 3) return;
-        if(vertices.size() != 4) return;
-
-        vertex one = vertices[0];
-        vertex two = vertices[1];
-        vertex three = vertices[2];
-        vertex four = vertices[3];
-
-        vertices.clear();
-    }
+    void addMaterial(Material &mat){
+        material = mat;
+    };
 private:
     //Normal vector
-    Vector3D norm;
+    Eigen::Vector3d norm;
     //Tangent vector
-    Vector3D tangent;
+    Eigen::Vector3d tangent;
     //Bitangent vector
-    Vector3D bitangent;
+    Eigen::Vector3d bitangent;
 
     double vecNormal;
 };

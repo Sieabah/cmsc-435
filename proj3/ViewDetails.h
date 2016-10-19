@@ -10,7 +10,6 @@
 #ifndef RAYTRACER_RENDERER_H
 #define RAYTRACER_RENDERER_H
 
-#include "Vector3D.h"
 #include "Actor.h"
 #include "Ray.h"
 #include "Light.h"
@@ -33,14 +32,14 @@ public:
     /**
      * Setters
      */
-    void Position(Vector3D coord);
-    void LookVec(Vector3D coord);
-    void UpVec(Vector3D coord);
+    void Position(Eigen::Vector3d coord);
+    void LookVec(Eigen::Vector3d coord);
+    void UpVec(Eigen::Vector3d coord);
     void Angle(double value);
     void Hither(double value);
     void Resolution(unsigned int x, unsigned int y);
     void Background(double R, double G, double B);
-    void Fill(Vector3D color);
+    void Fill(Eigen::Vector3d color);
 
     /**
      * Getters
@@ -48,8 +47,8 @@ public:
     double FoV();
     unsigned int width();
     unsigned int height();
-    Vector3D foreground(); //Not used anymore
-    Vector3D background();
+    Eigen::Vector3d foreground(); //Not used anymore
+    Eigen::Vector3d background();
 
     /**
      * Variables from the book
@@ -58,13 +57,13 @@ public:
     Eigen::Vector3d look(){ return Eigen::Vector3d(spot() - eye()); }
     Eigen::Vector3d rightVec(){ return look().cross(upPoint()); }
     Eigen::Vector3d up(){ return rightVec().cross(look()); }
-    Eigen::Vector3d upPoint(){ return Eigen::Vector3d(upVector.x, upVector.y, upVector.z); }
+    Eigen::Vector3d upPoint(){ return upVector; }
     Eigen::Vector3d w(){ return look().normalized() * -1; }
     Eigen::Vector3d u(){ return up().cross(w()).normalized(); }
     Eigen::Vector3d v(){ return w().cross(u()); }
 
     Eigen::Vector3d spot(){
-        return Eigen::Vector3d(lookAt.x, lookAt.y, lookAt.z);
+        return lookAt;
     }
 
     /**
@@ -89,7 +88,7 @@ public:
      * AddLight
      * Add light to scene
      */
-    void AddLight(Vector3D light);
+    void AddLight(Eigen::Vector3d light);
 
     const Light *getLight(int index){
         if(index >= lights.size() || index < 0)
@@ -106,13 +105,13 @@ private:
     std::vector<Light> lights;
 
     //Color & Shading
-    Vector3D backgroundColor;
-    Vector3D fillColor;
+    Eigen::Vector3d backgroundColor;
+    Eigen::Vector3d fillColor;
 
     //Position and Direction
-    Vector3D position;
-    Vector3D lookAt;
-    Vector3D upVector;
+    Eigen::Vector3d position;
+    Eigen::Vector3d lookAt;
+    Eigen::Vector3d upVector;
     double fov;
     double hither;
 

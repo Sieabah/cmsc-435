@@ -107,9 +107,9 @@ public:
 protected:
 
     bool bCull(std::vector<vertex> verts){
-        Eigen::Vector4d original_p1(verts[0].pos.x, verts[0].pos.y, verts[0].pos.z, 1.0);
-        Eigen::Vector4d original_p2(verts[1].pos.x, verts[1].pos.y, verts[1].pos.z, 1.0);
-        Eigen::Vector4d original_p3(verts[2].pos.x, verts[2].pos.y, verts[2].pos.z, 1.0);
+        Eigen::Vector4d original_p1(verts[0].pos(0), verts[0].pos(1), verts[0].pos(2), 1.0);
+        Eigen::Vector4d original_p2(verts[1].pos(0), verts[1].pos(1), verts[1].pos(2), 1.0);
+        Eigen::Vector4d original_p3(verts[2].pos(0), verts[2].pos(1), verts[2].pos(2), 1.0);
 
         original_p1 = M_camera * original_p1;
         original_p2 = M_camera * original_p2;
@@ -122,10 +122,7 @@ protected:
         Eigen::Vector3d V = p2 - p1;
         Eigen::Vector3d W = p3 - p1;
 
-        Eigen::Vector3d eV(V(0), V(1), V(2));
-        Eigen::Vector3d eW(W(0), W(1), W(2));
-
-        Eigen::Vector3d normal = eV.cross(eW);
+        Eigen::Vector3d normal = V.cross(W);
 
         return normal.dot(p1) > 0;
 
@@ -147,7 +144,7 @@ protected:
                 continue;
 
             for(std::vector<vertex>::iterator jt = actor->getVerticies()->begin(); jt < actor->getVerticies()->end(); jt++){
-                Eigen::Vector4d vec(jt->pos.x, jt->pos.y, jt->pos.z, 1.0);
+                Eigen::Vector4d vec(jt->pos(0), jt->pos(1), jt->pos(2), 1.0);
                 vec = M_matrix * vec;
 
                 //Have to do this to work with windows
@@ -250,7 +247,7 @@ protected:
                         fragment.verts = verts;
                         fragment.pixel.first = x;
                         fragment.pixel.second = y;
-                        fragment.color = Eigen::Vector3d(actor->Texture().color.x, actor->Texture().color.y, actor->Texture().color.z);
+                        fragment.color = actor->Texture().color;
                         fragment.material = actor->Texture();
 
                         fragments[y][x].push_back(fragment);
@@ -268,17 +265,14 @@ protected:
     }
 
     void PhongShading(ViewDetails *view, const std::vector<Light> *lights, Fragment &fragment, Eigen::Vector3d &color) const {
-        color = Eigen::Vector3d(view->foreground().x, view->foreground().y, view->foreground().z);
+        color = view->foreground();
 
     }
 
     void FlatShading(ViewDetails *view, const std::vector<Light> *lights, Fragment &fragment, Eigen::Vector3d &color) const {
         //@todo per-pixel coloring
-        Vector3D V = fragment.verts[1].pos - fragment.verts[0].pos;
-        Vector3D W = fragment.verts[2].pos - fragment.verts[0].pos;
-
-        Eigen::Vector3d eV(V.x, V.y, V.z);
-        Eigen::Vector3d eW(W.x, W.y, W.z);
+        Eigen::Vector3d eV(fragment.verts[1].pos - fragment.verts[0].pos);
+        Eigen::Vector3d eW(fragment.verts[2].pos - fragment.verts[0].pos);
 
         Eigen::Vector3d normal = eV.cross(eW);
 
@@ -287,7 +281,7 @@ protected:
         }
         Eigen::Vector3d resultColor(0, 0, 0);
 
-        Eigen::Vector3d facePosition(fragment.verts[0].pos.x, fragment.verts[0].pos.y, fragment.verts[0].pos.z);
+        Eigen::Vector3d facePosition(fragment.verts[0].pos);
 
         for (std::vector<Light>::const_iterator light = lights->begin(); light < lights->end(); light++) {
             Eigen::Vector3d result = light->GetColor(facePosition, view->eye(), normal, fragment.material,
@@ -347,7 +341,7 @@ protected:
                 Raster[y][x].zbuffer = view->farPlane();
 
                 if(fragments[y][x].size() == 0){
-                    Raster[y][x].color = Eigen::Vector3d(view->background().x, view->background().y, view->background().z);
+                    Raster[y][x].color = view->background();
                 } else {
                     for(std::vector<Fragment>::iterator fragment = fragments[y][x].begin(); fragment < fragments[y][x].end(); fragment++){
                         if(fragment->zbuffer < Raster[y][x].zbuffer)

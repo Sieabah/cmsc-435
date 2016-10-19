@@ -10,8 +10,7 @@
 #ifndef RAYTRACER_MATERIAL_H
 #define RAYTRACER_MATERIAL_H
 
-
-#include "Vector3D.h"
+#include <Eigen/Dense>
 
 /**
  * Shader struct
@@ -58,17 +57,17 @@ public:
      * Material
      * initialize material with given color and shader
      */
-    Material(Vector3D colour, Shading shade): color(colour), shader(shade) {};
+    Material(Eigen::Vector3d colour, Shading shade): color(colour), shader(shade) {};
 
     /**
      * Material
      * Create material from color and shader parameters
      */
-    Material(Vector3D colour, double Kd, double Ks, double shine, double t, double index):
+    Material(Eigen::Vector3d colour, double Kd, double Ks, double shine, double t, double index):
             color(colour), shader(Shading(Kd, Ks, shine, t, index)) {};
 
     //Material color
-    Vector3D color;
+    Eigen::Vector3d color;
 
     //Material shader
     Shading shader;

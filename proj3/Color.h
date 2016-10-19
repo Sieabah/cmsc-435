@@ -6,6 +6,7 @@
 #define ROOTPROJ_COLOR_H
 
 #include <Eigen/Dense>
+
 /**
  * Color
  * Struct to convert vector color to a 24-bit color
@@ -30,13 +31,6 @@ struct Color{
         G = Convert(vec(1));
         B = Convert(vec(2));
     }
-
-    //Take vector and convert it to 3 color channels
-    Color(Vector3D vec){
-        R = Convert(vec.x);
-        G = Convert(vec.y);
-        B = Convert(vec.z);
-    };
 
     unsigned char R;
     unsigned char G;

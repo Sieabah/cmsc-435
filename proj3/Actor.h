@@ -27,18 +27,16 @@ public:
     virtual ~vertex(){}
 
     //3D point in space
-    Vector3D pos;
+    Eigen::Vector3d pos;
 
     //3D point in space
     Eigen::Vector4d *camera_pos;
     //Tangent and bitangent of this point
     double tangent, bitangent;
 
-    /**
-     * vertex
-     * constructor
-     */
-    vertex(const Vector3D &vec){pos = vec;}
+    vertex(const Eigen::Vector3d &vec){
+        pos = vec;
+    }
 };
 
 class Actor {
@@ -48,7 +46,7 @@ public:
      * addVert
      * Add vertex to polygon
      */
-    void addVert(Vector3D coord) {
+    void addVert(Eigen::Vector3d coord) {
         vertices.push_back(vertex(coord));
     }
 
@@ -67,12 +65,6 @@ public:
      * Virtual destructor
      */
     virtual ~Actor(){};
-
-    /**
-     * normal
-     * Return normal vector given another vector
-     */
-    virtual Vector3D normal(const Vector3D &vec) const = 0;
 
     /**
      * Texture

@@ -10,7 +10,7 @@
 #ifndef RAYTRACER_WORLD_H
 #define RAYTRACER_WORLD_H
 
-#include "Vector3D.h"
+#include <Eigen/Dense>
 
 #include "ViewDetails.h"
 #include "Ray.h"
@@ -51,7 +51,7 @@ public:
      * AddLight
      * Add lights to the world
      */
-    void AddLight(const Vector3D &light);
+    void AddLight(const Eigen::Vector3d &light);
 
     /**
      * PrintWorldInformation

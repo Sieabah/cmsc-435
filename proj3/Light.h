@@ -38,9 +38,9 @@ public:
 
         double bias = (I).normalized().dot(normal.normalized());
 
-        color(0) = material.color.x * channel*bias;
-        color(1) = material.color.y * channel*bias;
-        color(2) = material.color.z * channel*bias;
+        color(0) = material.color(0) * channel*bias;
+        color(1) = material.color(1) * channel*bias;
+        color(2) = material.color(2) * channel*bias;
 
         return color;
     }

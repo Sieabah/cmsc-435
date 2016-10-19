@@ -17,9 +17,9 @@
  * Renderer
  * Default constructor
  */
-ViewDetails::ViewDetails(): position(Vector3D()), lookAt(Vector3D()), upVector(Vector3D()),
+ViewDetails::ViewDetails(): position(Eigen::Vector3d(0,0,0)), lookAt(Eigen::Vector3d(0,0,0)), upVector(Eigen::Vector3d(0,0,0)),
                       fov(0), hither(0), resX(640),resY(480),
-                      backgroundColor(Vector3D(0,0,0)), fillColor(Vector3D(255,0,0)){};
+                      backgroundColor(Eigen::Vector3d(0,0,0)), fillColor(Eigen::Vector3d(255,0,0)){};
 
 /**
  * PrintRenderInformation
@@ -68,14 +68,14 @@ void ViewDetails::PrintRenderInformation()
  * Return camera position
  */
 Eigen::Vector3d ViewDetails::eye() {
-    return Eigen::Vector3d(position.x, position.y, position.z);
+    return position;
 }
 
 /**
  * background
  * Return background vector color
  */
-Vector3D ViewDetails::background() {
+Eigen::Vector3d ViewDetails::background() {
     return backgroundColor;
 }
 
@@ -83,7 +83,7 @@ Vector3D ViewDetails::background() {
  * foreground
  * Return fill color vector color
  */
-Vector3D ViewDetails::foreground() {
+Eigen::Vector3d ViewDetails::foreground() {
     return fillColor;
 }
 
@@ -114,7 +114,7 @@ double ViewDetails::FoV() {
  * Fill
  * Set fill color
  */
-void ViewDetails::Fill(Vector3D color) {
+void ViewDetails::Fill(Eigen::Vector3d color) {
     fillColor = color;
 }
 
@@ -123,7 +123,7 @@ void ViewDetails::Fill(Vector3D color) {
  * Set background color
  */
 void ViewDetails::Background(double R, double G, double B) {
-    backgroundColor = Vector3D(R,G,B);
+    backgroundColor = Eigen::Vector3d(R,G,B);
 }
 
 /**
@@ -154,7 +154,7 @@ void ViewDetails::Angle(double value) {
  * UpVec
  * Set the upwards vector
  */
-void ViewDetails::UpVec(Vector3D coord) {
+void ViewDetails::UpVec(Eigen::Vector3d coord) {
     upVector = coord;
 }
 
@@ -162,7 +162,7 @@ void ViewDetails::UpVec(Vector3D coord) {
  * LookVec
  * Set the lookat vector
  */
-void ViewDetails::LookVec(Vector3D coord) {
+void ViewDetails::LookVec(Eigen::Vector3d coord) {
     lookAt = coord;
 }
 
@@ -170,7 +170,7 @@ void ViewDetails::LookVec(Vector3D coord) {
  * Position
  * Set the camera position
  */
-void ViewDetails::Position(Vector3D coord) {
+void ViewDetails::Position(Eigen::Vector3d coord) {
     position = coord;
 }
 
@@ -208,8 +208,8 @@ double ViewDetails::left() { return right() * (-1); }
  * AddLight
  * Add light to render scene
  */
-void ViewDetails::AddLight(Vector3D light) {
-    lights.push_back(Light(light.x, light.y, light.z));
+void ViewDetails::AddLight(Eigen::Vector3d light) {
+    lights.push_back(Light(light));
 }
 
 /**

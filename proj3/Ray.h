@@ -10,7 +10,7 @@
 #ifndef RAYTRACER_RAY_H
 #define RAYTRACER_RAY_H
 
-#include "Vector3D.h"
+#include <Eigen/Dense>
 
 class Ray {
 public:
@@ -18,14 +18,14 @@ public:
      * Ray
      * constructor for creating simple ray
      */
-    Ray(Vector3D pos, Vector3D dir, double nearP=1e-4, double farP=INFINITY):
+    Ray(Eigen::Vector3d pos, Eigen::Vector3d dir, double nearP=1e-4, double farP=INFINITY):
             position(pos), direction(dir), nearPlane(nearP), farPlane(farP) {};
 
     /**
      * Getters
      */
-    Vector3D pos() const{return position;}
-    Vector3D dir() const{return direction;}
+    Eigen::Vector3d pos() const{return position;}
+    Eigen::Vector3d dir() const{return direction;}
     double near() const{return nearPlane;}
     double far() const{return farPlane;}
 
@@ -35,10 +35,10 @@ public:
     double far(double len){farPlane = len;}
 private:
     //Ray origin
-    Vector3D position;
+    Eigen::Vector3d position;
 
     //Ray direction
-    Vector3D direction;
+    Eigen::Vector3d direction;
 
     //Near/far clipping planes
     double nearPlane;
