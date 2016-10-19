@@ -275,16 +275,19 @@ protected:
     }
 
 private:
+    bool zBuffer_set = false;
     double zBuffer_min = 0;
-    double zBuffer_max = 500;
+    double zBuffer_max = 0;
 public:
     void defineZBuffer(double min, double max){
         zBuffer_max = max;
         zBuffer_min = min;
+        zBuffer_set = true;
     }
 
 protected:
 
+    void th(){}
     void Save(std::string outputFile){
         if(DEBUG_OUTPUT)
             std::cout << "Saving to file " << outputFile << std::endl;
@@ -293,20 +296,33 @@ protected:
 
         unsigned char output[view->width()][view->height()][3];
 
-        double maxZ, minZ = maxZ = view->nearPlane();
+        if(OUTPUT_Z_BUFFER && !zBuffer_set){
+            zBuffer_min = view->nearPlane();
+            for(int y = 0; y < view->height(); y++){
+                for(int x = 0; x < view->width(); x++){
+                    pixels[y][x].second = fabs(pixels[y][x].second);
+                    if(pixels[y][x].second == view->farPlane()) continue;
 
+                    zBuffer_min = pixels[y][x].second < zBuffer_min ? pixels[y][x].second : zBuffer_min;
+                    zBuffer_max = pixels[y][x].second > zBuffer_max ? pixels[y][x].second : zBuffer_max;
+                }
+            }
+        }
+
+        std::cout << zBuffer_max << "|" << zBuffer_min << std::endl;
         int yOffset = view->height()-1;
         for(int y = 0; y < view->height(); y++){
             for(int x = 0; x < view->width(); x++){
-
+                std::pair<Eigen::Vector3d, double> &offsetPixel = pixels[yOffset - y][x];
+                std::pair<Eigen::Vector3d, double> &savePixel = pixels[y][x];
                 if(OUTPUT_Z_BUFFER){
-                    output[y][x][0] = Color::Convert((pixels[yOffset-y][x].second-minZ)/maxZ);
-                    if(pixels[yOffset-y][x].second == view->farPlane())
-                        pixels[yOffset-y][x].second = minZ;
-                    output[y][x][1] = Color::Convert((pixels[yOffset-y][x].second-minZ)/maxZ);
-                    output[y][x][2] = Color::Convert((pixels[yOffset-y][x].second-minZ)/maxZ);
+                    double color = (fabs(offsetPixel.second)-zBuffer_min)/zBuffer_max;
+
+                    output[y][x][0] = Color::Convert(color);
+                    output[y][x][1] = Color::Convert(color);
+                    output[y][x][2] = Color::Convert(color);
                 } else {
-                    Color color(pixels[yOffset-y][x].first);
+                    Color color(offsetPixel.first);
 
                     output[y][x][0] = color.R;
                     output[y][x][1] = color.G;

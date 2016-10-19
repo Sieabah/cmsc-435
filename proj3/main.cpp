@@ -15,7 +15,7 @@
 
 using namespace std;
 
-const bool OUTPUT_ZBUFFER = false;
+const bool OUTPUT_ZBUFFER = true;
 const bool DEBUG = false;
 const bool CULLING_ENABLED = false;
 
@@ -51,8 +51,6 @@ int main(int argc, char *argv[]) {
     };
 
     Pipeline pipeline(&world, DEBUG, OUTPUT_ZBUFFER, CULLING_ENABLED);
-
-    pipeline.defineZBuffer(0,50);
     pipeline.run(argv[2]);
 
     cout << "End" << endl;
