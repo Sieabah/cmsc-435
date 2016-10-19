@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
         return 1;
     };
 
-    Pipeline pipeline(&world, DEBUG, OUTPUT_ZBUFFER, CULLING_ENABLED);
+    Pipeline pipeline(&world, FLAT, DEBUG, OUTPUT_ZBUFFER, CULLING_ENABLED);
     pipeline.run(argv[2]);
 
     cout << "End" << endl;
