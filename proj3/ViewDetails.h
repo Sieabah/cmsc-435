@@ -10,12 +10,10 @@
 #ifndef RAYTRACER_RENDERER_H
 #define RAYTRACER_RENDERER_H
 
-//Simple max function macro
-#define MAX(a, b) ((a > b) ? a : b)
-
 #include "Vector3D.h"
 #include "Actor.h"
 #include "Ray.h"
+#include "Light.h"
 
 #include <limits>
 #include <vector>
@@ -65,8 +63,6 @@ public:
     Eigen::Vector3d u(){ return up().cross(w()).normalized(); }
     Eigen::Vector3d v(){ return w().cross(u()); }
 
-    double t();
-
     Eigen::Vector3d spot(){
         return Eigen::Vector3d(lookAt.x, lookAt.y, lookAt.z);
     }
@@ -74,10 +70,14 @@ public:
     /**
      * Viewing pane variables
      */
+    double t();
     double top();
     double bottom();
     double right();
     double left();
+
+    double nearPlane(){ return hither; }
+    double farPlane(){ return nearPlane()*1000; }
 
     /**
      * PrintRenderInformation
@@ -91,18 +91,19 @@ public:
      */
     void AddLight(Vector3D light);
 
-    double nearPlane(){ return hither; }
-    double farPlane(){ return nearPlane()*1000; }
-
-    const Vector3D *getLight(int index){
+    const Light *getLight(int index){
         if(index >= lights.size() || index < 0)
             return NULL;
 
         return &lights[index];
     }
+
+    const std::vector<Light> *getLights(){
+        return &lights;
+    }
 private:
     //Lights
-    std::vector<Vector3D> lights;
+    std::vector<Light> lights;
 
     //Color & Shading
     Vector3D backgroundColor;

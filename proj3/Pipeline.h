@@ -29,133 +29,22 @@ private:
 
     const bool DEBUG_OUTPUT;
     const bool OUTPUT_Z_BUFFER;
-
-protected:
-    void GenerateViewMatrix(){
-        ViewDetails *view = m_world->getRenderer();
-
-        M_vp(0,0) = ((double)view->width())/2.0;
-        M_vp(1,1) = ((double)view->height())/2.0;
-        M_vp(0,3) = ((double)view->width() - 1.0)/2.0;
-        M_vp(1,3) = ((double)view->height() - 1.0)/2.0;
-        M_vp(2,2) = 1.0;
-        M_vp(3,3) = 1.0;
-
-        if(DEBUG_OUTPUT)
-            std::cout << "ViewMatrix" << std::endl << M_vp << std::endl;
-    }
-    void GenerateOrthogonalMatrix() {
-        ViewDetails *view = m_world->getRenderer();
-
-        //X
-        M_ortho(0, 0) = 2.0 / (view->right() - view->left());
-        M_ortho(0, 3) = -(view->right() + view->left()) / (view->right() - view->left());
-
-        //Y
-        M_ortho(1, 1) = 2.0 / (view->top() - view->bottom());
-        M_ortho(1, 3) = -(view->top() + view->bottom()) / (view->top() - view->bottom());
-
-        //Z
-        M_ortho(2, 2) = 2/(view->nearPlane() - view->farPlane());
-        M_ortho(2, 3) = -(view->nearPlane() + view->farPlane()) / (view->nearPlane() - view->farPlane());
-
-        M_ortho(3, 3) = 1.0;
-
-        if(DEBUG_OUTPUT)
-            std::cout << "Orthogonal" << std::endl << M_ortho << std::endl;
-    }
-
-    void GenerateCameraMatrix(){
-        ViewDetails *view = m_world->getRenderer();
-
-        //LOOK
-        Eigen::Vector3d w = view->w();
-
-        //RIGHT
-        Eigen::Vector3d u = view->u();
-
-        //UP
-        Eigen::Vector3d v = view->v();
-
-        M_camera(0,0) = u(0);
-        M_camera(0,1) = u(1);
-        M_camera(0,2) = u(2);
-
-        M_camera(1,0) = v(0);
-        M_camera(1,1) = v(1);
-        M_camera(1,2) = v(2);
-
-        M_camera(2,0) = w(0);
-        M_camera(2,1) = w(1);
-        M_camera(2,2) = w(2);
-
-        M_camera(3,3) = 1.0;
-
-        if(DEBUG_OUTPUT)
-            std::cout << "Pre-Eye Camera" << std::endl << M_camera << std::endl;
-
-        Eigen::Matrix4d eyeMatrix = Eigen::Matrix4d::Identity();
-
-        eyeMatrix(0,3) = -view->eye()(0);
-        eyeMatrix(1,3) = -view->eye()(1);
-        eyeMatrix(2,3) = -view->eye()(2);
-
-        if(DEBUG_OUTPUT)
-            std::cout << "Eye" << std::endl << eyeMatrix << std::endl;
-
-        M_camera = M_camera * eyeMatrix;
-
-        if(DEBUG_OUTPUT)
-            std::cout << "Camera" << std::endl << M_camera << std::endl;
-    }
-
-    void GeneratePerspectiveMatrix(){
-        ViewDetails *view = m_world->getRenderer();
-
-        M_persp(0,0) = view->nearPlane();
-
-        M_persp(1,1) = view->nearPlane();
-
-        M_persp(2,2) = view->nearPlane()+view->farPlane();
-
-        M_persp(2,3) = -view->farPlane()*view->nearPlane();
-
-        M_persp(3,2) = 1.0;
-
-
-        if(DEBUG_OUTPUT)
-            std::cout << "P-Matrix" << std::endl << M_persp << std::endl;
-
-        M_persp = M_ortho * M_persp;
-
-        if(DEBUG_OUTPUT)
-            std::cout << "Perspective" << std::endl << M_persp << std::endl;
-    }
-
-    void GenerateMMatrix(){
-        M_vp = Eigen::Matrix4d::Zero();
-        M_ortho = Eigen::Matrix4d::Zero();
-        M_persp = Eigen::Matrix4d::Zero();
-        M_camera = Eigen::Matrix4d::Zero();
-        M_matrix = Eigen::Matrix4d::Zero();
-
-        GenerateViewMatrix();
-        GenerateOrthogonalMatrix();
-        GeneratePerspectiveMatrix();
-        GenerateCameraMatrix();
-
-        M_matrix = M_vp * M_persp * M_camera;
-
-        if(DEBUG_OUTPUT)
-            std::cout << "M-Matrix" << std::endl << M_matrix << std::endl;
-    }
+    const bool CULL_ENABLED;
 
     //Data array
     raster pixels;
+
+protected:
+    void GenerateViewMatrix();
+    void GenerateOrthogonalMatrix();
+    void GenerateCameraMatrix();
+    void GeneratePerspectiveMatrix();
+    void GenerateMMatrix();
+
 public:
 
-    Pipeline(World *world, bool zBuffer=false, bool debug=false): m_world(world),
-    DEBUG_OUTPUT(debug), OUTPUT_Z_BUFFER(zBuffer){
+    Pipeline(World *world, bool debug=false, bool zBuffer=false, bool culling=false): m_world(world),
+    DEBUG_OUTPUT(debug), OUTPUT_Z_BUFFER(zBuffer), CULL_ENABLED(culling){
         if(DEBUG_OUTPUT)
             std::cout << "Pipeline" << std::endl;
 
@@ -171,31 +60,70 @@ public:
         }
     }
 
-    void run(std::string outputFile){
+    void run(std::string outputFile) {
         GenerateMMatrix();
 
         std::cout << "Step 1/5 VP" << std::endl;
-        VertexProcessing();
+        std::vector<Actor*> actors = VertexProcessing();
+
         std::cout << "Step 2/5 C" << std::endl;
-        Clipping();
+        //std::vector<Actor*> actors = Clipping();
+
         std::cout << "Step 3/5 R" << std::endl;
-        Rasterization();
+        /* fragments = */Rasterization(actors);
+
         std::cout << "Step 4/5 FP" << std::endl;
         FragmentProcessing();
+
         std::cout << "Step 5/5 B" << std::endl;
         Blending();
+
         Save(outputFile);
     }
 protected:
 
-    void VertexProcessing(){
+    bool bCull(std::vector<vertex> verts){
+        Eigen::Vector4d original_p1(verts[0].pos.x, verts[0].pos.y, verts[0].pos.z, 1.0);
+        Eigen::Vector4d original_p2(verts[1].pos.x, verts[1].pos.y, verts[1].pos.z, 1.0);
+        Eigen::Vector4d original_p3(verts[2].pos.x, verts[2].pos.y, verts[2].pos.z, 1.0);
+
+        original_p1 = M_camera * original_p1;
+        original_p2 = M_camera * original_p2;
+        original_p3 = M_camera * original_p3;
+
+        Eigen::Vector3d p1(original_p1(0), original_p1(1), original_p1(2));
+        Eigen::Vector3d p2(original_p2(0), original_p2(1), original_p2(2));
+        Eigen::Vector3d p3(original_p3(0), original_p3(1), original_p3(2));
+
+        Eigen::Vector3d V = p2 - p1;
+        Eigen::Vector3d W = p3 - p1;
+
+        Eigen::Vector3d eV(V(0), V(1), V(2));
+        Eigen::Vector3d eW(W(0), W(1), W(2));
+
+        Eigen::Vector3d normal = eV.cross(eW);
+
+        if(normal.dot(p1) > 0){
+            return true;
+        }
+
+        return false;
+    }
+    std::vector<Actor*> VertexProcessing(){
         if(DEBUG_OUTPUT)
             std::cout << "VertexProcessing" << std::endl;
 
         const std::vector<Actor*>* actors = m_world->Actors();
 
+        std::vector<Actor*> actorsToProcess;
+
         for(std::vector<Actor*>::const_iterator it = actors->begin(); it < actors->end(); it++){
             Actor *actor = (*it);
+
+            std::vector<vertex> verts = *actor->getVerticies();
+
+            if(CULL_ENABLED && bCull(verts))
+                continue;
 
             for(std::vector<vertex>::iterator jt = actor->getVerticies()->begin(); jt < actor->getVerticies()->end(); jt++){
                 Eigen::Vector4d vec(jt->pos.x, jt->pos.y, jt->pos.z, 1.0);
@@ -204,7 +132,15 @@ protected:
                 //Have to do this to work with windows
                 jt->camera_pos = new Eigen::Vector4d(vec);
             }
+
+            actorsToProcess.push_back(actor);
         }
+
+        if(DEBUG_OUTPUT && CULL_ENABLED)
+            std::cout << actorsToProcess.size() << "/" << actors->size()
+                      << ((double)actors->size()-actorsToProcess.size())/actors->size()*100 << "% culled" << std::endl;
+
+        return actorsToProcess;
     }
 
     void Clipping(){
@@ -224,19 +160,17 @@ private:
     }
 
 protected:
-    void Rasterization(){
+    void Rasterization(std::vector<Actor*> actors){
         if(DEBUG_OUTPUT)
             std::cout << "Rasterization" << std::endl;
 
         ViewDetails *view = m_world->getRenderer();
 
-        const std::vector<Actor*>* actors = m_world->Actors();
-
-        view->getLight(0);
+        const std::vector<Light> *lights = view->getLights();
 
         double minmax[] = {0, 0, 0, 0};
 
-        for(std::vector<Actor*>::const_iterator it = actors->begin(); it < actors->end(); it++) {
+        for(std::vector<Actor*>::const_iterator it = actors.begin(); it < actors.end(); it++) {
             Actor *actor = (*it);
 
             std::vector<vertex> verts = *(actor->getVerticies());
@@ -259,11 +193,6 @@ protected:
                     verts[2].camera_pos->coeffRef(2)/verts[2].camera_pos->coeffRef(3)
             );
 
-            //Scale
-            xValues = xValues;
-            yValues = yValues;
-            zValues = zValues;
-
             int minX = (int)floor(std::max((double)0.0, xValues.minCoeff()));
             int maxX = (int)ceil(std::min((double)view->width(), xValues.maxCoeff()));
 
@@ -278,7 +207,33 @@ protected:
 
             //Triangle coloring
             //@todo per-pixel coloring
-            Eigen::Vector3d color(actor->Texture().color.x, actor->Texture().color.y, actor->Texture().color.z);
+            Eigen::Vector3d color;
+
+            Vector3D V = verts[1].pos - verts[0].pos;
+            Vector3D W = verts[3].pos - verts[0].pos;
+
+            Eigen::Vector3d eV(V.x, V.y, V.z);
+            Eigen::Vector3d eW(W.x, W.y, W.z);
+
+            Eigen::Vector3d normal = eV.cross(eW).normalized();
+
+            if(lights->size() > 0){
+                Eigen::Vector3d resultColor(0, 0, 0);
+
+                Eigen::Vector3d facePosition(verts[0].pos.x, verts[0].pos.y, verts[0].pos.z);
+
+                for(auto light = lights->begin(); light < lights->end(); light++){
+                    Eigen::Vector4d result = light->GetColor(facePosition, normal, actor->Texture());
+
+                    resultColor(0) += result(0) > 0 ? result(0) : 0;
+                    resultColor(1) += result(1) > 0 ? result(1) : 0;
+                    resultColor(2) += result(2) > 0 ? result(2) : 0;
+                }
+
+                color = resultColor;
+            }
+            else
+                color = Eigen::Vector3d(actor->Texture().color.x, actor->Texture().color.y, actor->Texture().color.z);
 
             for(int y = minY; y < maxY; y++){
                 for(int x = minX; x < maxX; x++){
@@ -292,7 +247,7 @@ protected:
                         if(zbuffer < pixels[y][x].second) {
                             // assign color
                             //Trippy Color Assignment
-                            //pixels[y][x].first = Eigen::Vector3d(color(0)*alpha, color(1)*beta, color(2)*gamma);
+                            //pixels[y][x].first = Eigen::Vector3d(1*alpha, 1*beta, 1*gamma);
 
                             pixels[y][x].first = color;
                             pixels[y][x].second = zbuffer;

@@ -17,6 +17,7 @@ using namespace std;
 
 const bool OUTPUT_ZBUFFER = false;
 const bool DEBUG = false;
+const bool CULLING_ENABLED = false;
 
 /**
  * Checks for file existence
@@ -49,7 +50,7 @@ int main(int argc, char *argv[]) {
         return 1;
     };
 
-    Pipeline pipeline(&world, OUTPUT_ZBUFFER, DEBUG);
+    Pipeline pipeline(&world, DEBUG, OUTPUT_ZBUFFER, CULLING_ENABLED);
 
     pipeline.defineZBuffer(0,50);
     pipeline.run(argv[2]);

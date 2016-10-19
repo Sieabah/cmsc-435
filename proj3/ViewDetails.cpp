@@ -32,7 +32,10 @@ void ViewDetails::PrintRenderInformation()
 
     std::cout << "Lights: " << std::endl;
     for (int i = 0; i < lights.size(); ++i) {
-        std::cout << "\tLight " << i << ": " << lights[i] << std::endl;
+        std::cout << "\tLight " << i << ": "
+                  << lights[i].position()(0) << ", "
+                  << lights[i].position()(1) << ", "
+                  << lights[i].position()(2) << std::endl;
     }
 
     std::cout << "Position: " << position << std::endl;
@@ -206,7 +209,7 @@ double ViewDetails::left() { return right() * (-1); }
  * Add light to render scene
  */
 void ViewDetails::AddLight(Vector3D light) {
-    lights.push_back(light);
+    lights.push_back(Light(light.x, light.y, light.z));
 }
 
 /**
