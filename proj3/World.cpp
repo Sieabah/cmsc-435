@@ -38,7 +38,7 @@ void World::PrintWorldInformation()
  *
  * NFF File format: http://www.csee.umbc.edu/~adamb/435/nff.html
  */
-World World::GenerateWorldFromNFF(std::string filepath)
+bool World::GenerateWorldFromNFF(std::string filepath, World &world)
 {
     //Placeholder string
     std::string line;
@@ -46,170 +46,170 @@ World World::GenerateWorldFromNFF(std::string filepath)
     //File reader
     std::ifstream file(filepath.c_str());
 
-    //General world
-    World world = World();
-
     //Read from file
-    if(file.is_open())
-    {
-        Material material;
-
-        //Read line-by-line
-        while (getline(file, line))
-        {
-            //Split the line on spaces
-            std::istringstream df(line);
-
-            //Offset substring by one word
-            std::string sub;
-            df >> sub;
-
-            //General use variables for switch
-            double R,G,B;
-
-            //Switch on the first letter
-            switch(line[0])
-            {
-                //Handle Background
-                case 'b':
-                    df >> R; df >> G; df >> B;
-
-                    //Set background color
-                    world.getRenderer()->Background(R,G,B);
-                    break;
-
-                //Handle Viewport
-                case 'v':
-                    //For all values in the viewport
-                    for (int i = 0; i < 6; ++i) {
-                        //Holder variables
-                        std::string tmp;
-                        getline(file, tmp);
-
-                        //initialize and offset
-                        std::istringstream parameter(tmp);
-                        parameter >> sub;
-
-                        //Find which parameter we're reading
-                        switch(tmp[0])
-                        {
-                            //From vector
-                            case 'f':
-                                parameter >> R; parameter >> G; parameter >> B;
-                                //Update camera position
-                                world.getRenderer()->Position(Vector3D(R,G,B));
-                                break;
-
-                            //Look at vector & fov
-                            case 'a':
-                                //aT
-                                if(tmp[1] == 't')
-                                {
-                                    parameter >> R; parameter >> G; parameter >> B;
-                                    //Update look-at vector
-                                    world.getRenderer()->LookVec(Vector3D(R,G,B));
-                                }
-                                //aN
-                                else
-                                {
-                                    parameter >> R;
-                                    //Update fov
-                                    world.getRenderer()->Angle(R);
-                                }
-                                break;
-
-                            //Up vector
-                            case 'u':
-                                parameter >> R; parameter >> G; parameter >> B;
-
-                                //Update up vector
-                                world.getRenderer()->UpVec(Vector3D(R,G,B));
-                                break;
-
-                            //Hither value
-                            case 'h':
-                                parameter >> R;
-                                //Update hither
-                                world.getRenderer()->Hither(R);
-                                break;
-
-                            //Resolution
-                            case 'r':
-                                parameter >> R; parameter >> G;
-
-                                //Update resolution
-                                world.getRenderer()->Resolution((unsigned int)R, (unsigned int)G);
-                                break;
-
-                            //Unknown case
-                            default: break;
-
-                        }
-                    }
-                    break;
-
-                //Light
-                case 'l':
-                    df >> R; df >> G; df >> B;
-                    world.AddLight(Vector3D(R,G,B));
-                    break;
-
-                //Handle Fill color and shader
-                case 'f': {
-                    //Get the RGB values
-                    df >> R;
-                    df >> G;
-                    df >> B;
-
-                    //Define the shader
-                    Shading shader;
-                    df >> shader.Kd;
-                    df >> shader.Ks;
-                    df >> shader.Shine;
-                    df >> shader.T;
-                    df >> shader.index_of_refraction;
-
-                    //Update shader and fill color
-                    world.getRenderer()->Fill(Vector3D(R, G, B));
-
-                    //Update the material we're assigning to Actors
-                    material = Material(Vector3D(R, G, B), shader);
-                }
-                    break;
-
-                //Handle poly creation
-                case 'p': {
-                    //Get vertices count
-                    int count;
-                    df >> count;
-                    std::vector<Polygon*> polys;
-
-                    polys = generatePolys(file, line, count);
-
-                    for(std::vector<Polygon*>::iterator it = polys.begin(); it < polys.end(); it++){
-                        //Assign current material to poly actor
-                        (*it)->addMaterial(material);
-
-                        //Precalculate values for verticies
-                        (*it)->finalize();
-
-                        //Add polygon to world
-                        world.AddActor((*it));
-                    }
-                }
-                    break;
-
-                //Unknown command case
-                default: break;
-            }
-        }
-        //Close the file
-        file.close();
+    if(!file.is_open()) {
+        return false;
     }
+
+    Material material;
+
+    //Read line-by-line
+    while (getline(file, line))
+    {
+        //Split the line on spaces
+        std::istringstream df(line);
+
+        //Offset substring by one word
+        std::string sub;
+        df >> sub;
+
+        //General use variables for switch
+        double R,G,B;
+
+        //Switch on the first letter
+        switch(line[0])
+        {
+            //Handle Background
+            case 'b':
+                df >> R; df >> G; df >> B;
+
+                //Set background color
+                world.getRenderer()->Background(R,G,B);
+                break;
+
+            //Handle Viewport
+            case 'v':
+                //For all values in the viewport
+                for (int i = 0; i < 6; ++i) {
+                    //Holder variables
+                    std::string tmp;
+                    getline(file, tmp);
+
+                    //initialize and offset
+                    std::istringstream parameter(tmp);
+                    parameter >> sub;
+
+                    //Find which parameter we're reading
+                    switch(tmp[0])
+                    {
+                        //From vector
+                        case 'f':
+                            parameter >> R; parameter >> G; parameter >> B;
+                            //Update camera position
+                            world.getRenderer()->Position(Vector3D(R,G,B));
+                            break;
+
+                        //Look at vector & fov
+                        case 'a':
+                            //aT
+                            if(tmp[1] == 't')
+                            {
+                                parameter >> R; parameter >> G; parameter >> B;
+                                //Update look-at vector
+                                world.getRenderer()->LookVec(Vector3D(R,G,B));
+                            }
+                            //aN
+                            else
+                            {
+                                parameter >> R;
+                                //Update fov
+                                world.getRenderer()->Angle(R);
+                            }
+                            break;
+
+                        //Up vector
+                        case 'u':
+                            parameter >> R; parameter >> G; parameter >> B;
+
+                            //Update up vector
+                            world.getRenderer()->UpVec(Vector3D(R,G,B));
+                            break;
+
+                        //Hither value
+                        case 'h':
+                            parameter >> R;
+                            //Update hither
+                            world.getRenderer()->Hither(R);
+                            break;
+
+                        //Resolution
+                        case 'r':
+                            parameter >> R; parameter >> G;
+
+                            //Update resolution
+                            world.getRenderer()->Resolution((unsigned int)R, (unsigned int)G);
+                            break;
+
+                        //Unknown case
+                        default: break;
+
+                    }
+                }
+                break;
+
+            //Light
+            case 'l':
+                df >> R; df >> G; df >> B;
+                world.AddLight(Vector3D(R,G,B));
+                break;
+
+            //Handle Fill color and shader
+            case 'f': {
+                //Get the RGB values
+                df >> R;
+                df >> G;
+                df >> B;
+
+                //Define the shader
+                Shading shader;
+                df >> shader.Kd;
+                df >> shader.Ks;
+                df >> shader.Shine;
+                df >> shader.T;
+                df >> shader.index_of_refraction;
+
+                //Update shader and fill color
+                world.getRenderer()->Fill(Vector3D(R, G, B));
+
+                //Update the material we're assigning to Actors
+                material = Material(Vector3D(R, G, B), shader);
+            }
+                break;
+
+            //Handle poly creation
+            case 'p': {
+                //Get vertices count
+                int count;
+                df >> count;
+
+                std::vector<Polygon*> polys;
+
+                polys = generatePolys(file, line, count);
+
+                for(std::vector<Polygon*>::iterator it = polys.begin(); it < polys.end(); it++){
+                    //Assign current material to poly actor
+                    (*it)->addMaterial(material);
+
+                    //Precalculate values for verticies
+                    //(*it)->finalize();
+
+                    //Add polygon to world
+                    world.AddActor((*it));
+                }
+            }
+                break;
+
+            //Unknown command case
+            default: break;
+        }
+    }
+
+    //Close the file
+    file.close();
 
     //world.PrintWorldInformation();
     //Return generated world
-    return world;
+    return true;
 }
 
 /**

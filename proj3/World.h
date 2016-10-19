@@ -64,7 +64,7 @@ public:
      * GenerateWorldFromNFF
      * Generate a world object from a NFF file
      */
-    static World GenerateWorldFromNFF(std::string filepath);
+    static bool GenerateWorldFromNFF(std::string filepath, World &world);
 
     /**
      * Render

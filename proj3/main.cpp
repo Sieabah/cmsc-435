@@ -38,7 +38,13 @@ int main(int argc, char *argv[]) {
     }
 
     //Create world from NFF file
-    World world = World::GenerateWorldFromNFF(string(argv[1]));
+    World world = World();
+    if(!World::GenerateWorldFromNFF(string(argv[1]), world)){
+        std::cout << "Could not create valid world" << std::endl;
+        return 1;
+    };
+
+    world.PrintWorldInformation();
 
     cout << "Pipeline" << endl;
     Pipeline rendering = Pipeline(&world);
