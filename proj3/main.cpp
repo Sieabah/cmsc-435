@@ -8,11 +8,15 @@
  */
 
 #include <iostream>
-#include "World.h"
-#include "Pipeline.h"
 #include <sys/stat.h>
 
+#include "World.h"
+#include "Pipeline.h"
+
 using namespace std;
+
+const bool OUTPUT_ZBUFFER = false;
+const bool DEBUG = false;
 
 /**
  * Checks for file existence
@@ -39,28 +43,17 @@ int main(int argc, char *argv[]) {
 
     //Create world from NFF file
     World world = World();
+
     if(!World::GenerateWorldFromNFF(string(argv[1]), world)){
         std::cout << "Could not create valid world" << std::endl;
         return 1;
     };
 
-    world.PrintWorldInformation();
+    Pipeline pipeline(&world, OUTPUT_ZBUFFER, DEBUG);
 
-    cout << "Pipeline" << endl;
-    Pipeline rendering = Pipeline(&world);
-
-    cout << "VertexProcessing" << endl;
-    rendering.VertexProcessing();
-
-    cout << "Rasterization" << endl;
-    rendering.Rasterization();
-
-    cout << "Blending" << endl;
-    rendering.Blending(argv[2]);
+    pipeline.defineZBuffer(0,50);
+    pipeline.run(argv[2]);
 
     cout << "End" << endl;
-    //Render the world
-    //world.Render(argv[2]);
-
     return 0;
 }

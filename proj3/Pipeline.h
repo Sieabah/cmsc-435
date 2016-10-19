@@ -15,8 +15,6 @@
 #include "Polygon.h"
 #include "Color.h"
 
-const bool OUTPUT_Z_BUFFER = false;
-
 typedef std::vector<std::vector<std::pair<Eigen::Vector3d, double>>> raster;
 typedef std::vector<std::pair<Eigen::Vector3d, double>> pixelPairs;
 
@@ -29,6 +27,9 @@ private:
     Eigen::Matrix4d M_camera;
     Eigen::Matrix4d M_matrix;
 
+    const bool DEBUG_OUTPUT;
+    const bool OUTPUT_Z_BUFFER;
+
 protected:
     void GenerateViewMatrix(){
         ViewDetails *view = m_world->getRenderer();
@@ -40,8 +41,8 @@ protected:
         M_vp(2,2) = 1.0;
         M_vp(3,3) = 1.0;
 
-        std::cout << "ViewMatrix" << std::endl
-                  << M_vp << std::endl;
+        if(DEBUG_OUTPUT)
+            std::cout << "ViewMatrix" << std::endl << M_vp << std::endl;
     }
     void GenerateOrthogonalMatrix() {
         ViewDetails *view = m_world->getRenderer();
@@ -59,8 +60,9 @@ protected:
         M_ortho(2, 3) = -(view->nearPlane() + view->farPlane()) / (view->nearPlane() - view->farPlane());
 
         M_ortho(3, 3) = 1.0;
-        std::cout << "Orthogonal" << std::endl
-                  << M_ortho << std::endl;
+
+        if(DEBUG_OUTPUT)
+            std::cout << "Orthogonal" << std::endl << M_ortho << std::endl;
     }
 
     void GenerateCameraMatrix(){
@@ -89,8 +91,8 @@ protected:
 
         M_camera(3,3) = 1.0;
 
-        std::cout << "Pre-Eye Camera" << std::endl
-                  << M_camera << std::endl;
+        if(DEBUG_OUTPUT)
+            std::cout << "Pre-Eye Camera" << std::endl << M_camera << std::endl;
 
         Eigen::Matrix4d eyeMatrix = Eigen::Matrix4d::Identity();
 
@@ -98,13 +100,13 @@ protected:
         eyeMatrix(1,3) = -view->eye()(1);
         eyeMatrix(2,3) = -view->eye()(2);
 
-        std::cout << "Eye" << std::endl
-                  << eyeMatrix << std::endl;
+        if(DEBUG_OUTPUT)
+            std::cout << "Eye" << std::endl << eyeMatrix << std::endl;
 
         M_camera = M_camera * eyeMatrix;
 
-        std::cout << "Camera" << std::endl
-                  << M_camera << std::endl;
+        if(DEBUG_OUTPUT)
+            std::cout << "Camera" << std::endl << M_camera << std::endl;
     }
 
     void GeneratePerspectiveMatrix(){
@@ -121,31 +123,16 @@ protected:
         M_persp(3,2) = 1.0;
 
 
-        std::cout << "P-Matrix" << std::endl
-                  << M_persp << std::endl;
+        if(DEBUG_OUTPUT)
+            std::cout << "P-Matrix" << std::endl << M_persp << std::endl;
 
         M_persp = M_ortho * M_persp;
 
-        std::cout << "Perspective"
-                  << std::endl << M_persp << std::endl;
+        if(DEBUG_OUTPUT)
+            std::cout << "Perspective" << std::endl << M_persp << std::endl;
     }
 
-    //Data array
-    raster pixels;
-public:
-
-    Pipeline(World *world): m_world(world){
-        ViewDetails *view = m_world->getRenderer();
-
-        pixels.resize(view->height());
-        for(raster::iterator i = pixels.begin(); i < pixels.end(); i++){
-            i->resize(view->width());
-            for(pixelPairs::iterator j = i->begin(); j < i->end(); j++){
-                j->first = Eigen::Vector3d(view->background().x, view->background().y, view->background().z);
-                j->second = view->farPlane();
-            }
-        }
-
+    void GenerateMMatrix(){
         M_vp = Eigen::Matrix4d::Zero();
         M_ortho = Eigen::Matrix4d::Zero();
         M_persp = Eigen::Matrix4d::Zero();
@@ -159,12 +146,52 @@ public:
 
         M_matrix = M_vp * M_persp * M_camera;
 
-        std::cout << "M-Matrix" << std::endl
-                  << M_matrix << std::endl;
-
+        if(DEBUG_OUTPUT)
+            std::cout << "M-Matrix" << std::endl << M_matrix << std::endl;
     }
 
+    //Data array
+    raster pixels;
+public:
+
+    Pipeline(World *world, bool zBuffer=false, bool debug=false): m_world(world),
+    DEBUG_OUTPUT(debug), OUTPUT_Z_BUFFER(zBuffer){
+        if(DEBUG_OUTPUT)
+            std::cout << "Pipeline" << std::endl;
+
+        ViewDetails *view = m_world->getRenderer();
+
+        pixels.resize(view->height());
+        for(raster::iterator i = pixels.begin(); i < pixels.end(); i++){
+            i->resize(view->width());
+            for(pixelPairs::iterator j = i->begin(); j < i->end(); j++){
+                j->first = Eigen::Vector3d(view->background().x, view->background().y, view->background().z);
+                j->second = view->farPlane();
+            }
+        }
+    }
+
+    void run(std::string outputFile){
+        GenerateMMatrix();
+
+        std::cout << "Step 1/5 VP" << std::endl;
+        VertexProcessing();
+        std::cout << "Step 2/5 C" << std::endl;
+        Clipping();
+        std::cout << "Step 3/5 R" << std::endl;
+        Rasterization();
+        std::cout << "Step 4/5 FP" << std::endl;
+        FragmentProcessing();
+        std::cout << "Step 5/5 B" << std::endl;
+        Blending();
+        Save(outputFile);
+    }
+protected:
+
     void VertexProcessing(){
+        if(DEBUG_OUTPUT)
+            std::cout << "VertexProcessing" << std::endl;
+
         const std::vector<Actor*>* actors = m_world->Actors();
 
         for(std::vector<Actor*>::const_iterator it = actors->begin(); it < actors->end(); it++){
@@ -195,13 +222,19 @@ private:
     double raster_f01(double x, double y, Eigen::Vector3d &xValues, Eigen::Vector3d &yValues) {
         return (yValues[0] - yValues[1])*x + (xValues[1] - xValues[0])*y + xValues[0]*yValues[1] - xValues[1]*yValues[0];
     }
-public:
+
+protected:
     void Rasterization(){
+        if(DEBUG_OUTPUT)
+            std::cout << "Rasterization" << std::endl;
+
         ViewDetails *view = m_world->getRenderer();
 
         const std::vector<Actor*>* actors = m_world->Actors();
 
-        //view->getLight(0);
+        view->getLight(0);
+
+        double minmax[] = {0, 0, 0, 0};
 
         for(std::vector<Actor*>::const_iterator it = actors->begin(); it < actors->end(); it++) {
             Actor *actor = (*it);
@@ -209,33 +242,39 @@ public:
             std::vector<vertex> verts = *(actor->getVerticies());
 
             Eigen::Vector3d xValues(
-                    verts[0].camera_pos->coeffRef(0),
-                    verts[1].camera_pos->coeffRef(0),
-                    verts[2].camera_pos->coeffRef(0)
+                    verts[0].camera_pos->coeffRef(0)/verts[0].camera_pos->coeffRef(3),
+                    verts[1].camera_pos->coeffRef(0)/verts[1].camera_pos->coeffRef(3),
+                    verts[2].camera_pos->coeffRef(0)/verts[2].camera_pos->coeffRef(3)
             );
 
             Eigen::Vector3d yValues(
-                    verts[0].camera_pos->coeffRef(1),
-                    verts[1].camera_pos->coeffRef(1),
-                    verts[2].camera_pos->coeffRef(1)
+                    verts[0].camera_pos->coeffRef(1)/verts[0].camera_pos->coeffRef(3),
+                    verts[1].camera_pos->coeffRef(1)/verts[1].camera_pos->coeffRef(3),
+                    verts[2].camera_pos->coeffRef(1)/verts[2].camera_pos->coeffRef(3)
             );
 
             Eigen::Vector3d zValues(
-                    verts[0].camera_pos->coeffRef(2),
-                    verts[1].camera_pos->coeffRef(2),
-                    verts[2].camera_pos->coeffRef(2)
+                    verts[0].camera_pos->coeffRef(2)/verts[0].camera_pos->coeffRef(3),
+                    verts[1].camera_pos->coeffRef(2)/verts[1].camera_pos->coeffRef(3),
+                    verts[2].camera_pos->coeffRef(2)/verts[2].camera_pos->coeffRef(3)
             );
 
             //Scale
-            xValues = xValues/M_matrix(0,3) * (view->width());
-            yValues = yValues/M_matrix(1,3) * (view->height());
-            zValues = zValues/M_matrix(2,3);
+            xValues = xValues;
+            yValues = yValues;
+            zValues = zValues;
 
             int minX = (int)floor(std::max((double)0.0, xValues.minCoeff()));
             int maxX = (int)ceil(std::min((double)view->width(), xValues.maxCoeff()));
 
+            minmax[0] = xValues.minCoeff() < minmax[0] ? xValues.minCoeff() : minmax[0];
+            minmax[2] = xValues.maxCoeff() > minmax[2] ? xValues.maxCoeff() : minmax[2];
+
             int minY = (int)floor(std::max((double)0.0, yValues.minCoeff()));
             int maxY = (int)ceil(std::min((double)view->height(), yValues.maxCoeff()));
+
+            minmax[1] = yValues.minCoeff() < minmax[1] ? yValues.minCoeff() : minmax[1];
+            minmax[3] = yValues.maxCoeff() > minmax[3] ? yValues.maxCoeff() : minmax[3];
 
             //Triangle coloring
             //@todo per-pixel coloring
@@ -262,28 +301,44 @@ public:
                 }
             }
         }
+
+        if(DEBUG_OUTPUT) {
+            std::cout << "min: " << minmax[0] << ", " << minmax[1] << std::endl;
+            std::cout << "max: " << minmax[2] << ", " << minmax[3] << std::endl;
+        }
     }
 
     void FragmentProcessing(){
+        if(DEBUG_OUTPUT)
+            std::cout << "Fragment Processing" << std::endl;
         return;
     }
 
-    void Blending(std::string outputFile){
+    void Blending(){
+        if(DEBUG_OUTPUT)
+            std::cout << "Blending" << std::endl;
+    }
+
+private:
+    double zBuffer_min = 0;
+    double zBuffer_max = 500;
+public:
+    void defineZBuffer(double min, double max){
+        zBuffer_max = max;
+        zBuffer_min = min;
+    }
+
+protected:
+
+    void Save(std::string outputFile){
+        if(DEBUG_OUTPUT)
+            std::cout << "Saving to file " << outputFile << std::endl;
+
         ViewDetails *view = m_world->getRenderer();
 
         unsigned char output[view->width()][view->height()][3];
 
         double maxZ, minZ = maxZ = view->nearPlane();
-        if(OUTPUT_Z_BUFFER) {
-            for (int y = 0; y < view->height(); y++) {
-                for (int x = 0; x < view->width(); x++) {
-                    if (pixels[y][x].second > maxZ && pixels[y][x].second != view->farPlane())
-                        maxZ = pixels[y][x].second;
-                    if (pixels[y][x].second < minZ)
-                        minZ = pixels[y][x].second;
-                }
-            }
-        }
 
         int yOffset = view->height()-1;
         for(int y = 0; y < view->height(); y++){
