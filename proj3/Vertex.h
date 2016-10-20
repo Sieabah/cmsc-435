@@ -1,6 +1,11 @@
-//
-// Created by Christopher on 10/20/2016.
-//
+/**
+ * Vertex.h
+ *
+ * Christopher S Sidell
+ * CMSC 435 Assignment 3 - Graphics Pipeline
+ *
+ * A vertex point
+ */
 
 #ifndef ROOTPROJ_VERTEX_H_H
 #define ROOTPROJ_VERTEX_H_H
@@ -21,6 +26,7 @@ public:
 
     //3D point in space
     Eigen::Vector4d *camera_pos;
+    
     //Tangent and bitangent of this point
     double tangent, bitangent;
 
