@@ -36,7 +36,7 @@ struct Fragment{
     double zbuffer;
 };
 
-enum LIGHTING{ FLAT, PHONG };
+enum LIGHTING{ NONE, FLAT, LAMBERT, PHONG };
 
 typedef std::vector<std::vector<Fragment> > raster;
 typedef std::vector<raster> fragmentRaster;
@@ -70,8 +70,10 @@ public:
 
     Pipeline(World *world, LIGHTING lighting = FLAT, bool debug=false, bool zBuffer=false, bool culling=false): m_world(world),
     DEBUG_OUTPUT(debug), OUTPUT_Z_BUFFER(zBuffer), CULL_ENABLED(culling), LIGHTING_TYPE(lighting){
-        if(DEBUG_OUTPUT)
+        if(DEBUG_OUTPUT) {
             std::cout << "Pipeline" << std::endl;
+            std::cout << "Lighting Model " << LIGHTING_TYPE << std::endl;
+        }
 
         zBuffer_min = 0;
         zBuffer_max = 0;
@@ -265,21 +267,90 @@ protected:
     }
 
     void PhongShading(ViewDetails *view, const std::vector<Light> *lights, Fragment &fragment, Eigen::Vector3d &color) const {
-        color = view->foreground();
+        Eigen::Vector3d resultColor(0, 0, 0);
 
+        if (lights->size() == 0) {
+            color = resultColor;
+            return;
+        }
+
+        Eigen::Vector3d &A = fragment.verts[0].pos;
+        Eigen::Vector3d &B = fragment.verts[1].pos;
+        Eigen::Vector3d &C = fragment.verts[2].pos;
+
+        //@todo per-pixel coloring
+        Eigen::Vector3d faceNormal = (B-A).cross(C-A).normalized();
+
+        Eigen::Vector3d point = fragment.verts[0].pos*fragment.alpha
+                                + fragment.verts[1].pos*fragment.beta
+                                + fragment.verts[2].pos*fragment.gamma;
+
+        Eigen::Vector3d diffuse = fragment.material.color * fragment.material.shader.Kd;
+
+        for(auto light = lights->begin(); light < lights->end(); light++){
+            double intensity = light->intensity()/sqrt(lights->size());
+
+            Eigen::Vector3d lightDir = (light->position() - point).normalized();
+
+            Eigen::Vector3d h = (view->eye()+lightDir).normalized();
+
+            double phongHighlight = intensity*pow(h.dot(faceNormal), fragment.material.shader.Shine);
+            double specular = fragment.material.shader.Ks * phongHighlight;
+
+            Eigen::Vector3d tmpColor = diffuse * (intensity * std::max(0.0, faceNormal.dot(lightDir)));
+
+            tmpColor += Eigen::Vector3d(specular, specular, specular);
+
+            resultColor += tmpColor;
+        }
+
+        color = resultColor;
+    }
+
+    void LambertShading(ViewDetails *view, const std::vector<Light> *lights, Fragment &fragment, Eigen::Vector3d &color) const {
+        Eigen::Vector3d resultColor(0, 0, 0);
+
+        if (lights->size() == 0) {
+            color = resultColor;
+            return;
+        }
+
+        Eigen::Vector3d &A = fragment.verts[0].pos;
+        Eigen::Vector3d &B = fragment.verts[1].pos;
+        Eigen::Vector3d &C = fragment.verts[2].pos;
+
+        //@todo per-pixel coloring
+        Eigen::Vector3d normal = (B-A).cross(C-A).normalized();
+
+        Eigen::Vector3d point = fragment.verts[0].pos*fragment.alpha
+                                + fragment.verts[1].pos*fragment.beta
+                                + fragment.verts[2].pos*fragment.gamma;
+
+        Eigen::Vector3d diffuse = fragment.material.color * fragment.material.shader.Kd;
+
+        for(auto light = lights->begin(); light < lights->end(); light++){
+            double Cl = light->intensity()/sqrt(lights->size());
+
+            Eigen::Vector3d lightDir = (light->position() - point).normalized();
+
+            resultColor += diffuse * normal.dot(lightDir);
+        }
+
+        color = resultColor;
     }
 
     void FlatShading(ViewDetails *view, const std::vector<Light> *lights, Fragment &fragment, Eigen::Vector3d &color) const {
-        //@todo per-pixel coloring
-        Eigen::Vector3d eV(fragment.verts[1].pos - fragment.verts[0].pos);
-        Eigen::Vector3d eW(fragment.verts[2].pos - fragment.verts[0].pos);
-
-        Eigen::Vector3d normal = eV.cross(eW);
+        color = Eigen::Vector3d(0, 0, 0);
 
         if (lights->size() == 0) {
             return;
         }
-        Eigen::Vector3d resultColor(0, 0, 0);
+
+        //@todo per-pixel coloring
+        Eigen::Vector3d V(fragment.verts[1].pos - fragment.verts[0].pos);
+        Eigen::Vector3d W(fragment.verts[2].pos - fragment.verts[0].pos);
+
+        Eigen::Vector3d normal = V.cross(W);
 
         Eigen::Vector3d facePosition(fragment.verts[0].pos);
 
@@ -287,12 +358,14 @@ protected:
             Eigen::Vector3d result = light->GetColor(facePosition, view->eye(), normal, fragment.material,
                                                      light->position());
 
-            resultColor(0) += std::max(result(0), 0.0);
-            resultColor(1) += std::max(result(1), 0.0);
-            resultColor(2) += std::max(result(2), 0.0);
+            color(0) += std::max(result(0), 0.0);
+            color(1) += std::max(result(1), 0.0);
+            color(2) += std::max(result(2), 0.0);
         }
+    }
 
-        color = resultColor;
+    void NoShading(Fragment &fragment, Eigen::Vector3d &color) const {
+        color = fragment.color;
     }
 
     fragmentRaster FragmentProcessing(fragmentRaster &fragments){
@@ -308,13 +381,14 @@ protected:
                 for(std::vector<Fragment>::iterator fragment = fragments[y][x].begin(); fragment < fragments[y][x].end(); fragment++){
                     Eigen::Vector3d color;
 
-                    switch(LIGHTING_TYPE) {
-                        PHONG:
-                            PhongShading(view, lights, *fragment, color);
-                            break;
-                        default:
-                            FlatShading(view, lights, *fragment, color);
-                    }
+                    if(LIGHTING_TYPE == PHONG)
+                        PhongShading(view, lights, *fragment, color);
+                    else if(LIGHTING_TYPE == LAMBERT)
+                        LambertShading(view, lights, *fragment, color);
+                    else if(LIGHTING_TYPE == FLAT)
+                        FlatShading(view, lights, *fragment, color);
+                    else
+                        NoShading(*fragment, color);
 
                     fragment->color = color;
                 }

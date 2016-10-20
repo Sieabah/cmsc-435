@@ -18,6 +18,7 @@ using namespace std;
 const bool OUTPUT_ZBUFFER = false;
 const bool DEBUG = true;
 const bool CULLING_ENABLED = false;
+const LIGHTING LIGHTING_MODEL = PHONG;
 
 /**
  * Checks for file existence
@@ -50,7 +51,7 @@ int main(int argc, char *argv[]) {
         return 1;
     };
 
-    Pipeline pipeline(&world, FLAT, DEBUG, OUTPUT_ZBUFFER, CULLING_ENABLED);
+    Pipeline pipeline(&world, LIGHTING_MODEL, DEBUG, OUTPUT_ZBUFFER, CULLING_ENABLED);
     pipeline.run(argv[2]);
 
     cout << "End" << endl;

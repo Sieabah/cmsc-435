@@ -32,6 +32,8 @@ public:
     void addMaterial(Material &mat){
         material = mat;
     };
+
+    void finalize();
 private:
     //Normal vector
     Eigen::Vector3d norm;

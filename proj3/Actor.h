@@ -10,9 +10,9 @@
 #define RAYTRACER_ACTOR_H
 
 #include <vector>
+#include <Eigen/Dense>
 
 #include "Material.h"
-#include <Eigen/Dense>
 
 class Ray;
 class World;

@@ -7,6 +7,14 @@ How to use:
 -To run:
 pipeline.out <input nff> <output.ppm>
 
+Notes:
+You can change running conditions in main.cpp by changing the constants passed into the pipeline.
+
+OUTPUT_ZBUFFER will output a zbuffer render of the image, white being closer and black being furthest, misses are solid white.
+DEBUG will output all debug information to the console
+CULLING_ENABLED will cull backfacing triangles
+LIGHTING_MODEL will render the image with different lighting models, PHONG, LAMBERT, FLAT, NONE
+
 Resources:
 
 Eigen3: http://eigen.tuxfamily.org/

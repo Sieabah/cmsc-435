@@ -52,6 +52,7 @@ bool World::GenerateWorldFromNFF(std::string filepath, World &world)
     }
 
     Material material;
+    ViewDetails *view = world.getRenderer();
 
     //Read line-by-line
     while (getline(file, line))
@@ -74,7 +75,7 @@ bool World::GenerateWorldFromNFF(std::string filepath, World &world)
                 df >> R; df >> G; df >> B;
 
                 //Set background color
-                world.getRenderer()->Background(R,G,B);
+                view->Background(R,G,B);
                 break;
 
             //Handle Viewport
@@ -96,7 +97,7 @@ bool World::GenerateWorldFromNFF(std::string filepath, World &world)
                         case 'f':
                             parameter >> R; parameter >> G; parameter >> B;
                             //Update camera position
-                            world.getRenderer()->Position(Eigen::Vector3d(R,G,B));
+                            view->Position(Eigen::Vector3d(R,G,B));
                             break;
 
                         //Look at vector & fov
@@ -106,14 +107,14 @@ bool World::GenerateWorldFromNFF(std::string filepath, World &world)
                             {
                                 parameter >> R; parameter >> G; parameter >> B;
                                 //Update look-at vector
-                                world.getRenderer()->LookVec(Eigen::Vector3d(R,G,B));
+                                view->LookVec(Eigen::Vector3d(R,G,B));
                             }
                             //aN
                             else
                             {
                                 parameter >> R;
                                 //Update fov
-                                world.getRenderer()->Angle(R);
+                                view->Angle(R);
                             }
                             break;
 
@@ -122,14 +123,14 @@ bool World::GenerateWorldFromNFF(std::string filepath, World &world)
                             parameter >> R; parameter >> G; parameter >> B;
 
                             //Update up vector
-                            world.getRenderer()->UpVec(Eigen::Vector3d(R,G,B));
+                            view->UpVec(Eigen::Vector3d(R,G,B));
                             break;
 
                         //Hither value
                         case 'h':
                             parameter >> R;
                             //Update hither
-                            world.getRenderer()->Hither(R);
+                            view->Hither(R);
                             break;
 
                         //Resolution
@@ -137,7 +138,7 @@ bool World::GenerateWorldFromNFF(std::string filepath, World &world)
                             parameter >> R; parameter >> G;
 
                             //Update resolution
-                            world.getRenderer()->Resolution((unsigned int)R, (unsigned int)G);
+                            view->Resolution((unsigned int)R, (unsigned int)G);
                             break;
 
                         //Unknown case
@@ -169,7 +170,7 @@ bool World::GenerateWorldFromNFF(std::string filepath, World &world)
                 df >> shader.index_of_refraction;
 
                 //Update shader and fill color
-                world.getRenderer()->Fill(Eigen::Vector3d(R, G, B));
+                view->Fill(Eigen::Vector3d(R, G, B));
 
                 //Update the material we're assigning to Actors
                 material = Material(Eigen::Vector3d(R, G, B), shader);
@@ -207,7 +208,6 @@ bool World::GenerateWorldFromNFF(std::string filepath, World &world)
     //Close the file
     file.close();
 
-    //world.PrintWorldInformation();
     //Return generated world
     return true;
 }
