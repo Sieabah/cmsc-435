@@ -26,7 +26,7 @@ public:
 
     //3D point in space
     Eigen::Vector4d *camera_pos;
-    
+
     //Tangent and bitangent of this point
     double tangent, bitangent;
 

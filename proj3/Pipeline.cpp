@@ -477,7 +477,7 @@ void Pipeline::PhongShading(ViewDetails *view, const std::vector<Light> *lights,
     Eigen::Vector3d diffuse = fragment.material.color * fragment.material.shader.Kd;
 
     //For all lights in scene
-    for(auto light = lights->begin(); light < lights->end(); light++){
+    for(std::vector<Light>::const_iterator = lights->begin(); light < lights->end(); light++){
         //Get light intensity
         double intensity = light->intensity()/sqrt(lights->size());
 
@@ -540,7 +540,7 @@ void Pipeline::LambertShading(ViewDetails *view, const std::vector<Light> *light
     //Get diffuse color
     Eigen::Vector3d diffuse = fragment.material.color * fragment.material.shader.Kd;
 
-    for(auto light = lights->begin(); light < lights->end(); light++){
+    for(std::vector<Light>::const_iterator light = lights->begin(); light < lights->end(); light++){
         //Light intensity
         double Cl = light->intensity()/sqrt(lights->size());
 
