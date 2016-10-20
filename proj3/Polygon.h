@@ -2,7 +2,7 @@
  * Polygon.h
  *
  * Christopher S Sidell
- * CMSC 435 Assignment 2 - RayTracing II
+ * CMSC 435 Assignment 3 - Graphics Pipeline
  *
  * n-sided polygon
  */
@@ -23,7 +23,10 @@ public:
      */
     Polygon(){};
 
-    ~Polygon(){}
+    /**
+     * Destructor
+     */
+    virtual ~Polygon(){}
 
     /**
      * addMaterial
@@ -33,15 +36,29 @@ public:
         material = mat;
     };
 
+    /**
+     * Precalculate values to detect if ray intersects poly
+     */
     void finalize();
 private:
-    //Normal vector
+    /**
+     * Normal Vector
+     */
     Eigen::Vector3d norm;
-    //Tangent vector
+
+    /**
+     * Tangent vector
+     */
     Eigen::Vector3d tangent;
-    //Bitangent vector
+
+    /**
+     * Bitangent vector
+     */
     Eigen::Vector3d bitangent;
 
+    /**
+     * Normal dot product
+     */
     double vecNormal;
 };
 

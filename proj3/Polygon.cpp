@@ -2,7 +2,7 @@
  * Polygon.cpp
  *
  * Christopher S Sidell
- * CMSC 435 Assignment 2 - RayTracing II
+ * CMSC 435 Assignment 3 - Graphics Pipeline
  *
  * n-sided polygon
  */

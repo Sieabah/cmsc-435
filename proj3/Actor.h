@@ -2,10 +2,11 @@
  * Actor.h
  *
  * Christopher S Sidell
- * CMSC 435 Assignment 2 - RayTracing II
+ * CMSC 435 Assignment 3 - Graphics Pipeline
  *
  * Abstract definition of an entity in the world
  */
+
 #ifndef RAYTRACER_ACTOR_H
 #define RAYTRACER_ACTOR_H
 

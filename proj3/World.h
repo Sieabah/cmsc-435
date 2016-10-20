@@ -2,7 +2,7 @@
  * World.h
  *
  * Christopher S Sidell
- * CMSC 435 Assignment 2 - RayTracing II
+ * CMSC 435 Assignment 3 - Graphics Pipeline
  *
  * World header definition
  */
@@ -22,24 +22,21 @@ class Polygon;
 
 class World {
 public:
-    //Default constructor
+    /**
+     * Default constructor
+     * @return
+     */
     World();
 
-    //Virtual destructor
-    virtual ~World()
-    {
-        //For all actors
-        while(!actors.empty()){
-            //Delete
-            delete actors.back();
-            actors.pop_back();
-        }
-    }
+    /**
+     * Destructor
+     */
+    virtual ~World();
 
     /**
-     * Return pointer to renderer
+     * Return pointer to camera
      */
-    ViewDetails * getRenderer();
+    ViewDetails *getRenderer();
 
     /**
      * AddPoly
@@ -72,11 +69,23 @@ public:
     const std::vector<Actor*> *Actors() const;
 
 private:
-    //Polygons in world
+    /**
+     * Actors (triangles) in the world
+     */
     std::vector<Actor*> actors;
-    //Camera
+
+    /**
+     * Camera
+     */
     ViewDetails camera;
 
+    /**
+     * Helper to generate triangles from not triangles
+     * @param file File pointer
+     * @param line Reference to current line
+     * @param count Number of points
+     * @return
+     */
     static std::vector<Polygon*> generatePolys(std::ifstream &file, std::string &line, int &count);
 };
 

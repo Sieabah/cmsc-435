@@ -2,18 +2,18 @@
  * World.h
  *
  * Christopher S Sidell
- * CMSC 435 Assignment 2 - RayTracing II
+ * CMSC 435 Assignment 3 - Graphics Pipeline
  *
  * World header definition
  */
 
-#include "World.h"
-#include "Polygon.h"
-
-
 #include <fstream>
 #include <sstream>
 #include <iostream>
+
+#include "World.h"
+#include "Polygon.h"
+#include "Actor.h"
 
 /**
  * World()
@@ -22,14 +22,26 @@
 World::World() : camera(ViewDetails()) {}
 
 /**
+ * Destructor
+ */
+World::~World() {
+    //For all actors
+    while(!actors.empty()){
+        //Delete
+        delete actors.back();
+        actors.pop_back();
+    }
+}
+
+/**
  * PrintWorldInformation
  * Prints basic world information and renderer information
  */
 void World::PrintWorldInformation()
 {
     std::cout << "World Information: " << std::endl;
-    getRenderer()->PrintRenderInformation();
     std::cout << "# of Actors: " << actors.size() << std::endl;
+    getRenderer()->PrintRenderInformation();
 }
 
 /**
@@ -51,6 +63,7 @@ bool World::GenerateWorldFromNFF(std::string filepath, World &world)
         return false;
     }
 
+    //General variables
     Material material;
     ViewDetails *view = world.getRenderer();
 
@@ -185,13 +198,15 @@ bool World::GenerateWorldFromNFF(std::string filepath, World &world)
 
                 std::vector<Polygon*> polys;
 
+                //Generate only triangle polygons
                 polys = generatePolys(file, line, count);
 
+                //Finalize polygons
                 for(std::vector<Polygon*>::iterator it = polys.begin(); it < polys.end(); it++){
                     //Assign current material to poly actor
                     (*it)->addMaterial(material);
 
-                    //Precalculate values for verticies
+                    //Precalculate values for verticies (RAY TRACING ONLY)
                     //(*it)->finalize();
 
                     //Add polygon to world
@@ -245,9 +260,17 @@ void World::AddLight(const Eigen::Vector3d &light) {
     getRenderer()->AddLight(light);
 }
 
+/**
+ * Generate triangles
+ * @param file File pointer
+ * @param line Current line
+ * @param count vertex count
+ * @return
+ */
 std::vector<Polygon*> World::generatePolys(std::ifstream &file, std::string &line, int &count) {
     std::vector<Polygon*> polys;
 
+    //If it is three, continue as normal
     if(count == 3) {
         Polygon *poly = new Polygon();
 
@@ -268,6 +291,8 @@ std::vector<Polygon*> World::generatePolys(std::ifstream &file, std::string &lin
             poly->addVert(Eigen::Vector3d(X, Y, Z));
         }
         polys.push_back(poly);
+
+    //If count is 4, build them 0-1-2 2-3-0
     } else if(count == 4){
         std::vector<Eigen::Vector3d> vectors;
 
@@ -291,16 +316,20 @@ std::vector<Polygon*> World::generatePolys(std::ifstream &file, std::string &lin
         Polygon *poly1 = new Polygon();
         Polygon *poly2 = new Polygon();
 
+        //First triangle 0-1-2
         poly1->addVert(vectors[0]);
         poly1->addVert(vectors[1]);
         poly1->addVert(vectors[2]);
 
+        //Second triangle 2-3-0
         poly2->addVert(vectors[2]);
         poly2->addVert(vectors[3]);
         poly2->addVert(vectors[0]);
 
         polys.push_back(poly1);
         polys.push_back(poly2);
+
+    //I don't want to do more math to figure out the actual shape
     } else {
         std::cout << "ARBITRARY POLYGONS NOT SUPPORTED" << std::endl;
     }

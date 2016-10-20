@@ -1,6 +1,11 @@
-//
-// Created by Christopher on 10/16/2016.
-//
+/**
+ * Color.h
+ *
+ * Christopher S Sidell
+ * CMSC 435 Assignment 3 - Graphics Pipeline
+ *
+ * Implementation of a [0, 1] color that converts to [0, 255]
+ */
 
 #ifndef ROOTPROJ_COLOR_H
 #define ROOTPROJ_COLOR_H

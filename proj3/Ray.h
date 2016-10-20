@@ -2,7 +2,7 @@
  * Ray.h
  *
  * Christopher S Sidell
- * CMSC 435 Assignment 2 - RayTracing II
+ * CMSC 435 Assignment 3 - Graphics Pipeline
  *
  * 3D ray class
  */
@@ -34,14 +34,24 @@ public:
      */
     double far(double len){farPlane = len;}
 private:
-    //Ray origin
+    /**
+     * Ray origin
+     */
     Eigen::Vector3d position;
 
-    //Ray direction
+    /**
+     * Ray direction
+     */
     Eigen::Vector3d direction;
 
-    //Near/far clipping planes
+    /**
+     * Near clipping plane
+     */
     double nearPlane;
+
+    /**
+     * Far clipping plane
+     */
     double farPlane;
 };
 

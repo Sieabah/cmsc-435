@@ -8,6 +8,7 @@
 #include <Eigen/Dense>
 #include <utility>
 #include <algorithm>
+#include <iostream>
 #include <stdio.h>
 #include "World.h"
 #include "ViewDetails.h"
@@ -73,6 +74,7 @@ public:
         if(DEBUG_OUTPUT) {
             std::cout << "Pipeline" << std::endl;
             std::cout << "Lighting Model " << LIGHTING_TYPE << std::endl;
+            world->PrintWorldInformation();
         }
 
         zBuffer_min = 0;

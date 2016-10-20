@@ -51,7 +51,10 @@ int main(int argc, char *argv[]) {
         return 1;
     };
 
+    //Setup pipeline
     Pipeline pipeline(&world, LIGHTING_MODEL, DEBUG, OUTPUT_ZBUFFER, CULLING_ENABLED);
+
+    //Run
     pipeline.run(argv[2]);
 
     cout << "End" << endl;

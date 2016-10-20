@@ -2,7 +2,7 @@
  * Material.h
  *
  * Christopher S Sidell
- * CMSC 435 Assignment 2 - RayTracing II
+ * CMSC 435 Assignment 3 - Graphics Pipeline
  *
  * Material instance with shader and diffuse color
  */
@@ -30,18 +30,30 @@ struct Shading{
     Shading(double _Kd, double _Ks, double _shine, double _t, double _index)
     : Kd(_Kd), Ks(_Ks), Shine(_shine), T(_t), index_of_refraction(_index)
     {}
-    //Diffuse component
+
+    /**
+     * Diffuse component
+     */
     double Kd;
 
-    //Specular
+    /**
+     * Specular
+     */
     double Ks;
 
-    //Shine (Phong cosine)
+    /**
+     * Shine (Phong cosine)
+     */
     double Shine;
 
-    //Transmittance
+    /**
+     * Transmittance
+     */
     double T;
 
+    /**
+     * Refraction index
+     */
     double index_of_refraction;
 };
 
@@ -66,10 +78,14 @@ public:
     Material(Eigen::Vector3d colour, double Kd, double Ks, double shine, double t, double index):
             color(colour), shader(Shading(Kd, Ks, shine, t, index)) {};
 
-    //Material color
+    /**
+     * Material color
+     */
     Eigen::Vector3d color;
 
-    //Material shader
+    /**
+     * Material shader
+     */
     Shading shader;
 };
 
