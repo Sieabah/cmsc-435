@@ -477,7 +477,7 @@ void Pipeline::PhongShading(ViewDetails *view, const std::vector<Light> *lights,
     Eigen::Vector3d diffuse = fragment.material.color * fragment.material.shader.Kd;
 
     //For all lights in scene
-    for(std::vector<Light>::const_iterator = lights->begin(); light < lights->end(); light++){
+    for(std::vector<Light>::const_iterator light = lights->begin(); light < lights->end(); light++){
         //Get light intensity
         double intensity = light->intensity()/sqrt(lights->size());
 
