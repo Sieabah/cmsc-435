@@ -3,3 +3,5 @@ trace
 *.out
 *.o
 *.ppm
+
+Eigen/
