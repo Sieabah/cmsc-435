@@ -1,5 +1,14 @@
 Description:
-This project is an implementation of the Graphics Pipeline with Vertex Processing, Rasterization, and Blending.
+This project is an implementation of the Graphics Pipeline with Vertex Processing,
+Rasterization, Fragment Processing, and Blending.
+
+I use Eigen for my Matrix math instead of VectorXD from the class. This requires
+ the ability for your user on GL to access my public directory for my CPP Includes.
+ If for some reason you don't have access please don't ding my grade. The professor
+ has requested me to not include Eigen in the repo and link it this way. I did get
+ permission to use it though.
+
+The Makefile should correctly compile.
 
 How to use:
 -Compile: make
