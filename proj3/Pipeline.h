@@ -1,33 +1,34 @@
-//
-// Created by Christopher on 10/14/2016.
-//
+/**
+ * Pipeline.h
+ *
+ * Christopher S Sidell
+ * CMSC 435 Assignment 3 - Graphics Pipeline
+ *
+ * Implementation of the software graphics pipeline
+ */
 
 #ifndef ROOTPROJ_PIPELINE_H
 #define ROOTPROJ_PIPELINE_H
 
 #include <Eigen/Dense>
-#include <utility>
-#include <algorithm>
-#include <iostream>
-#include <stdio.h>
-#include "World.h"
+#include "Material.h"
 #include "ViewDetails.h"
-#include "Actor.h"
-#include "Polygon.h"
-#include "Color.h"
+#include "Vertex.h"
 
+class World;
+class ViewDetails;
+class Actor;
+
+/**
+ * Graphical fragment
+ */
 struct Fragment{
     Fragment(){
         zbuffer = 0;
     }
 
-    Eigen::Vector3d xValues;
-    Eigen::Vector3d yValues;
-    Eigen::Vector3d zValues;
-
     Eigen::Vector3d color;
     Material material;
-    std::pair<int, int> pixel;
 
     double alpha;
     double beta;
@@ -37,454 +38,256 @@ struct Fragment{
     double zbuffer;
 };
 
+/**
+ * Lighting modes
+ */
 enum LIGHTING{ NONE, FLAT, LAMBERT, PHONG };
 
 typedef std::vector<std::vector<Fragment> > raster;
 typedef std::vector<raster> fragmentRaster;
 
+/**
+ * Graphics Pipeline (FcCG Chapter 8)
+ */
 class Pipeline {
 private:
+    /**
+     * World reference
+     */
     World* m_world;
+
+    /**
+     * Viewport matrix
+     */
     Eigen::Matrix4d M_vp;
+
+    /**
+     * Orthogonal matrix
+     */
     Eigen::Matrix4d M_ortho;
+
+    /**
+     * Perspective matrix
+     */
     Eigen::Matrix4d M_persp;
+
+    /**
+     * Camera matrix
+     */
     Eigen::Matrix4d M_camera;
+
+    /**
+     * M-Matrix (combination of vp*ortho*P*camera)
+     */
     Eigen::Matrix4d M_matrix;
 
+    /**
+     * Enable debug output
+     */
     const bool DEBUG_OUTPUT;
+
+    /**
+     * Output grayscale zBuffer
+     */
     const bool OUTPUT_Z_BUFFER;
+
+    /**
+     * Culling backfacing triangle enabled
+     */
     const bool CULL_ENABLED;
+
+    /**
+     * Lighting model, NONE|FLAT|LAMBERT|PHONG
+     */
     LIGHTING LIGHTING_TYPE;
 
+    /**
+     * Is zbuffer set?
+     */
     bool zBuffer_set;
+
+    /**
+     * zBuffer minimum
+     */
     double zBuffer_min;
+
+    /**
+     * zBuffer maximum
+     */
     double zBuffer_max;
 
 protected:
+
+    /**
+     * Generate viewing matrix pg.144 FoCG 7.2
+     */
     void GenerateViewMatrix();
+
+    /**
+     * Generate orthogonal matrix pg.145 FoCG 7.3
+     */
     void GenerateOrthogonalMatrix();
+
+    /**
+     * Generate Camera Matrix pg.147 FoCG 7.4
+     */
     void GenerateCameraMatrix();
+
+    /**
+     * Generate Perspective Matrix pg.152 & pg.154 FoCG
+     */
     void GeneratePerspectiveMatrix();
+
+    /**
+     * Generate M Matrix pg.155 FoCG
+     */
     void GenerateMMatrix();
 
 public:
 
-    Pipeline(World *world, LIGHTING lighting = FLAT, bool debug=false, bool zBuffer=false, bool culling=false): m_world(world),
-    DEBUG_OUTPUT(debug), OUTPUT_Z_BUFFER(zBuffer), CULL_ENABLED(culling), LIGHTING_TYPE(lighting){
-        if(DEBUG_OUTPUT) {
-            std::cout << "Pipeline" << std::endl;
-            std::cout << "Lighting Model " << LIGHTING_TYPE << std::endl;
-            world->PrintWorldInformation();
-        }
+    /**
+     * Constructor
+     * @param world World reference
+     * @param lighting Lighting model
+     * @param debug Debug output enabled
+     * @param zBuffer Output zbuffer
+     * @param culling Culling enabled
+     * @return
+     */
+    Pipeline(World *world, LIGHTING lighting = FLAT, bool debug=false,
+             bool zBuffer=false, bool culling=false);
 
-        zBuffer_min = 0;
-        zBuffer_max = 0;
-        zBuffer_set = false;
-    }
+    /**
+     * Run pipeline
+     * @param outputFile
+     */
+    void run(std::string outputFile);
 
-    void run(std::string outputFile) {
-        GenerateMMatrix();
+    /**
+     * Define zBuffer values
+     * @param min Min value
+     * @param max Max value
+     */
+    void defineZBuffer(double min, double max);
 
-        std::cout << "Step 1/5 VP" << std::endl;
-        std::vector<Actor*> actors = VertexProcessing();
-
-        std::cout << "Step 2/5 C" << std::endl;
-        //std::vector<Actor*> actors = Clipping();
-
-        std::cout << "Step 3/5 R" << std::endl;
-        fragmentRaster fragments = Rasterization(actors);
-
-        std::cout << "Step 4/5 FP" << std::endl;
-        fragments = FragmentProcessing(fragments);
-
-        std::cout << "Step 5/5 B" << std::endl;
-        raster Raster = Blending(fragments);
-
-        Save(outputFile, Raster);
-    }
-
-    void defineZBuffer(double min, double max){
-        zBuffer_max = max;
-        zBuffer_min = min;
-        zBuffer_set = true;
-    }
 protected:
 
-    bool bCull(std::vector<vertex> verts){
-        Eigen::Vector4d original_p1(verts[0].pos(0), verts[0].pos(1), verts[0].pos(2), 1.0);
-        Eigen::Vector4d original_p2(verts[1].pos(0), verts[1].pos(1), verts[1].pos(2), 1.0);
-        Eigen::Vector4d original_p3(verts[2].pos(0), verts[2].pos(1), verts[2].pos(2), 1.0);
+    /**
+     * Is this triangle backfacing?
+     * @param verts Vertices
+     * @return
+     */
+    bool bCull(std::vector<vertex> verts);
 
-        original_p1 = M_camera * original_p1;
-        original_p2 = M_camera * original_p2;
-        original_p3 = M_camera * original_p3;
+    /**
+     * Vertex Processing Stage
+     * @return
+     */
+    std::vector<Actor*> VertexProcessing();
 
-        Eigen::Vector3d p1(original_p1(0), original_p1(1), original_p1(2));
-        Eigen::Vector3d p2(original_p2(0), original_p2(1), original_p2(2));
-        Eigen::Vector3d p3(original_p3(0), original_p3(1), original_p3(2));
-
-        Eigen::Vector3d V = p2 - p1;
-        Eigen::Vector3d W = p3 - p1;
-
-        Eigen::Vector3d normal = V.cross(W);
-
-        return normal.dot(p1) > 0;
-
-    }
-    std::vector<Actor*> VertexProcessing(){
-        if(DEBUG_OUTPUT)
-            std::cout << "VertexProcessing" << std::endl;
-
-        const std::vector<Actor*>* actors = m_world->Actors();
-
-        std::vector<Actor*> actorsToProcess;
-
-        for(std::vector<Actor*>::const_iterator it = actors->begin(); it < actors->end(); it++){
-            Actor *actor = (*it);
-
-            std::vector<vertex> verts = *actor->getVerticies();
-
-            if(CULL_ENABLED && bCull(verts))
-                continue;
-
-            for(std::vector<vertex>::iterator jt = actor->getVerticies()->begin(); jt < actor->getVerticies()->end(); jt++){
-                Eigen::Vector4d vec(jt->pos(0), jt->pos(1), jt->pos(2), 1.0);
-                vec = M_matrix * vec;
-
-                //Have to do this to work with windows
-                jt->camera_pos = new Eigen::Vector4d(vec);
-            }
-
-            actorsToProcess.push_back(actor);
-        }
-
-        if(DEBUG_OUTPUT && CULL_ENABLED)
-            std::cout << actorsToProcess.size() << "/" << actors->size()
-                      << ((double)actors->size()-actorsToProcess.size())/actors->size()*100 << "% culled" << std::endl;
-
-        return actorsToProcess;
-    }
-
-    void Clipping(){
-        return;
-    }
+    /**
+     * Clipping stage
+     * NOT IMPLEMENTED
+     */
+    void Clipping(){ return; }
 
 private:
-    double raster_f12(double x, double y, Eigen::Vector3d &xValues, Eigen::Vector3d &yValues){
-        return (yValues[1] - yValues[2])*x + (xValues[2] - xValues[1])*y + xValues[1]*yValues[2] - xValues[2]*yValues[1];
-    }
-    double raster_f20(double x, double y, Eigen::Vector3d &xValues, Eigen::Vector3d &yValues){
-        return (yValues[2] - yValues[0])*x + (xValues[0] - xValues[2])*y + xValues[2]*yValues[0] - xValues[0]*yValues[2];
-    }
+    /**
+     * Barycentric coordinate function relevant for alpha (pg.169 FcOG)
+     * @param x Position
+     * @param y Position
+     * @param xValues All vertices
+     * @param yValues All vertices
+     * @return
+     */
+    double raster_f12(double x, double y, Eigen::Vector3d &xValues, Eigen::Vector3d &yValues);
 
-    double raster_f01(double x, double y, Eigen::Vector3d &xValues, Eigen::Vector3d &yValues) {
-        return (yValues[0] - yValues[1])*x + (xValues[1] - xValues[0])*y + xValues[0]*yValues[1] - xValues[1]*yValues[0];
-    }
+    /**
+     * Barycentric coordinate function relevant for beta (pg.169 FcOG)
+     * @param x Position
+     * @param y Position
+     * @param xValues All vertices
+     * @param yValues All vertices
+     * @return
+     */
+    double raster_f20(double x, double y, Eigen::Vector3d &xValues, Eigen::Vector3d &yValues);
+
+    /**
+     * Barycentric coordinate function relevant for gamma (pg.169 FcOG)
+     * @param x Position
+     * @param y Position
+     * @param xValues All vertices
+     * @param yValues All vertices
+     * @return
+     */
+    double raster_f01(double x, double y, Eigen::Vector3d &xValues, Eigen::Vector3d &yValues);
 
 protected:
 
-    fragmentRaster Rasterization(std::vector<Actor*> &actors){
-        if(DEBUG_OUTPUT)
-            std::cout << "Rasterization" << std::endl;
-
-        ViewDetails *view = m_world->getRenderer();
-
-        double minmax[] = {0, 0, 0, 0};
-
-        fragmentRaster fragments;
-
-        fragments.resize(view->height());
-        for(fragmentRaster::iterator i = fragments.begin(); i < fragments.end(); i++){
-            i->resize(view->width());
-        }
-
-        for(std::vector<Actor*>::const_iterator it = actors.begin(); it < actors.end(); it++) {
-            Actor *actor = (*it);
-
-            std::vector<vertex> verts = *(actor->getVerticies());
-
-            Eigen::Vector3d xValues(
-                    verts[0].camera_pos->coeffRef(0)/verts[0].camera_pos->coeffRef(3),
-                    verts[1].camera_pos->coeffRef(0)/verts[1].camera_pos->coeffRef(3),
-                    verts[2].camera_pos->coeffRef(0)/verts[2].camera_pos->coeffRef(3)
-            );
-
-            Eigen::Vector3d yValues(
-                    verts[0].camera_pos->coeffRef(1)/verts[0].camera_pos->coeffRef(3),
-                    verts[1].camera_pos->coeffRef(1)/verts[1].camera_pos->coeffRef(3),
-                    verts[2].camera_pos->coeffRef(1)/verts[2].camera_pos->coeffRef(3)
-            );
-
-            Eigen::Vector3d zValues(
-                    verts[0].camera_pos->coeffRef(2)/verts[0].camera_pos->coeffRef(3),
-                    verts[1].camera_pos->coeffRef(2)/verts[1].camera_pos->coeffRef(3),
-                    verts[2].camera_pos->coeffRef(2)/verts[2].camera_pos->coeffRef(3)
-            );
-
-            int minX = (int)floor(std::max((double)0.0, xValues.minCoeff()));
-            int maxX = (int)ceil(std::min((double)view->width(), xValues.maxCoeff()));
-
-            minmax[0] = xValues.minCoeff() < minmax[0] ? xValues.minCoeff() : minmax[0];
-            minmax[2] = xValues.maxCoeff() > minmax[2] ? xValues.maxCoeff() : minmax[2];
-
-            int minY = (int)floor(std::max((double)0.0, yValues.minCoeff()));
-            int maxY = (int)ceil(std::min((double)view->height(), yValues.maxCoeff()));
-
-            minmax[1] = yValues.minCoeff() < minmax[1] ? yValues.minCoeff() : minmax[1];
-            minmax[3] = yValues.maxCoeff() > minmax[3] ? yValues.maxCoeff() : minmax[3];
-
-            for(int y = minY; y < maxY; y++){
-                for(int x = minX; x < maxX; x++){
-                    double alpha = raster_f12(x,y, xValues, yValues)/raster_f12(xValues(0), yValues(0), xValues, yValues);
-                    double beta = raster_f20(x,y, xValues, yValues)/raster_f20(xValues(1), yValues(1), xValues, yValues);
-                    double gamma = raster_f01(x,y, xValues, yValues)/raster_f01(xValues(2), yValues(2), xValues, yValues);
-
-                    if(alpha > 0 && beta > 0 && gamma > 0) {
-                        Fragment fragment = Fragment();
-                        fragment.zbuffer = zValues[0] * alpha + zValues[1] * beta + zValues[2] * gamma;
-                        fragment.xValues = xValues;
-                        fragment.yValues = yValues;
-                        fragment.zValues = zValues;
-                        fragment.alpha = alpha;
-                        fragment.beta = beta;
-                        fragment.gamma = gamma;
-                        fragment.verts = verts;
-                        fragment.pixel.first = x;
-                        fragment.pixel.second = y;
-                        fragment.color = actor->Texture().color;
-                        fragment.material = actor->Texture();
-
-                        fragments[y][x].push_back(fragment);
-                    }
-                }
-            }
-        }
-
-        if(DEBUG_OUTPUT) {
-            std::cout << "min: " << minmax[0] << ", " << minmax[1] << std::endl;
-            std::cout << "max: " << minmax[2] << ", " << minmax[3] << std::endl;
-        }
-
-        return fragments;
-    }
-
-    void PhongShading(ViewDetails *view, const std::vector<Light> *lights, Fragment &fragment, Eigen::Vector3d &color) const {
-        Eigen::Vector3d resultColor(0, 0, 0);
-
-        if (lights->size() == 0) {
-            color = resultColor;
-            return;
-        }
-
-        Eigen::Vector3d &A = fragment.verts[0].pos;
-        Eigen::Vector3d &B = fragment.verts[1].pos;
-        Eigen::Vector3d &C = fragment.verts[2].pos;
-
-        //@todo per-pixel coloring
-        Eigen::Vector3d faceNormal = (B-A).cross(C-A).normalized();
-
-        Eigen::Vector3d point = fragment.verts[0].pos*fragment.alpha
-                                + fragment.verts[1].pos*fragment.beta
-                                + fragment.verts[2].pos*fragment.gamma;
-
-        Eigen::Vector3d diffuse = fragment.material.color * fragment.material.shader.Kd;
-
-        for(auto light = lights->begin(); light < lights->end(); light++){
-            double intensity = light->intensity()/sqrt(lights->size());
-
-            Eigen::Vector3d lightDir = (light->position() - point).normalized();
-
-            Eigen::Vector3d h = (view->eye()+lightDir).normalized();
-
-            double phongHighlight = intensity*pow(h.dot(faceNormal), fragment.material.shader.Shine);
-            double specular = fragment.material.shader.Ks * phongHighlight;
-
-            Eigen::Vector3d tmpColor = diffuse * (intensity * std::max(0.0, faceNormal.dot(lightDir)));
-
-            tmpColor += Eigen::Vector3d(specular, specular, specular);
-
-            resultColor += tmpColor;
-        }
-
-        color = resultColor;
-    }
-
-    void LambertShading(ViewDetails *view, const std::vector<Light> *lights, Fragment &fragment, Eigen::Vector3d &color) const {
-        Eigen::Vector3d resultColor(0, 0, 0);
-
-        if (lights->size() == 0) {
-            color = resultColor;
-            return;
-        }
-
-        Eigen::Vector3d &A = fragment.verts[0].pos;
-        Eigen::Vector3d &B = fragment.verts[1].pos;
-        Eigen::Vector3d &C = fragment.verts[2].pos;
-
-        //@todo per-pixel coloring
-        Eigen::Vector3d normal = (B-A).cross(C-A).normalized();
-
-        Eigen::Vector3d point = fragment.verts[0].pos*fragment.alpha
-                                + fragment.verts[1].pos*fragment.beta
-                                + fragment.verts[2].pos*fragment.gamma;
-
-        Eigen::Vector3d diffuse = fragment.material.color * fragment.material.shader.Kd;
-
-        for(auto light = lights->begin(); light < lights->end(); light++){
-            double Cl = light->intensity()/sqrt(lights->size());
-
-            Eigen::Vector3d lightDir = (light->position() - point).normalized();
-
-            resultColor += diffuse * normal.dot(lightDir);
-        }
-
-        color = resultColor;
-    }
-
-    void FlatShading(ViewDetails *view, const std::vector<Light> *lights, Fragment &fragment, Eigen::Vector3d &color) const {
-        color = Eigen::Vector3d(0, 0, 0);
-
-        if (lights->size() == 0) {
-            return;
-        }
-
-        //@todo per-pixel coloring
-        Eigen::Vector3d V(fragment.verts[1].pos - fragment.verts[0].pos);
-        Eigen::Vector3d W(fragment.verts[2].pos - fragment.verts[0].pos);
-
-        Eigen::Vector3d normal = V.cross(W);
-
-        Eigen::Vector3d facePosition(fragment.verts[0].pos);
-
-        for (std::vector<Light>::const_iterator light = lights->begin(); light < lights->end(); light++) {
-            Eigen::Vector3d result = light->GetColor(facePosition, view->eye(), normal, fragment.material,
-                                                     light->position());
-
-            color(0) += std::max(result(0), 0.0);
-            color(1) += std::max(result(1), 0.0);
-            color(2) += std::max(result(2), 0.0);
-        }
-    }
-
-    void NoShading(Fragment &fragment, Eigen::Vector3d &color) const {
-        color = fragment.color;
-    }
-
-    fragmentRaster FragmentProcessing(fragmentRaster &fragments){
-        if(DEBUG_OUTPUT)
-            std::cout << "Fragment Processing" << std::endl;
-
-        ViewDetails *view = m_world->getRenderer();
-
-        const std::vector<Light> *lights = view->getLights();
-
-        for(int y = 0; y < view->height(); y++) {
-            for (int x = 0; x < view->width(); x++) {
-                for(std::vector<Fragment>::iterator fragment = fragments[y][x].begin(); fragment < fragments[y][x].end(); fragment++){
-                    Eigen::Vector3d color;
-
-                    if(LIGHTING_TYPE == PHONG)
-                        PhongShading(view, lights, *fragment, color);
-                    else if(LIGHTING_TYPE == LAMBERT)
-                        LambertShading(view, lights, *fragment, color);
-                    else if(LIGHTING_TYPE == FLAT)
-                        FlatShading(view, lights, *fragment, color);
-                    else
-                        NoShading(*fragment, color);
-
-                    fragment->color = color;
-                }
-            }
-        }
-
-        return fragments;
-    }
-
-    raster Blending(fragmentRaster &fragments){
-        if(DEBUG_OUTPUT)
-            std::cout << "Blending" << std::endl;
-        ViewDetails *view = m_world->getRenderer();
-
-        raster Raster;
-
-        Raster.resize(view->height());
-        for(raster::iterator i = Raster.begin(); i < Raster.end(); i++){
-            i->resize(view->width());
-        }
-
-        for(int y = 0; y < view->height(); y++){
-            for(int x = 0; x < view->width(); x++) {
-                Raster[y][x].zbuffer = view->farPlane();
-
-                if(fragments[y][x].size() == 0){
-                    Raster[y][x].color = view->background();
-                } else {
-                    for(std::vector<Fragment>::iterator fragment = fragments[y][x].begin(); fragment < fragments[y][x].end(); fragment++){
-                        if(fragment->zbuffer < Raster[y][x].zbuffer)
-                            Raster[y][x] = *fragment;
-                    }
-                }
-            }
-        }
-
-        return Raster;
-    }
-
-protected:
-
-    void Save(std::string outputFile, raster &pixels){
-        if(DEBUG_OUTPUT)
-            std::cout << "Saving to file " << outputFile << std::endl;
-
-        ViewDetails *view = m_world->getRenderer();
-
-        unsigned char output[view->width()][view->height()][3];
-
-        if(OUTPUT_Z_BUFFER && !zBuffer_set){
-            zBuffer_min = view->nearPlane();
-            for(int y = 0; y < view->height(); y++){
-                for(int x = 0; x < view->width(); x++){
-                    pixels[y][x].zbuffer = fabs(pixels[y][x].zbuffer);
-                    if(pixels[y][x].zbuffer == view->farPlane()) continue;
-
-                    zBuffer_min = pixels[y][x].zbuffer < zBuffer_min ? pixels[y][x].zbuffer : zBuffer_min;
-                    zBuffer_max = pixels[y][x].zbuffer > zBuffer_max ? pixels[y][x].zbuffer : zBuffer_max;
-                }
-            }
-        }
-
-        int yOffset = view->height()-1;
-        for(int y = 0; y < view->height(); y++){
-            for(int x = 0; x < view->width(); x++){
-                Fragment &offsetPixel = pixels[yOffset - y][x];
-                Fragment &savePixel = pixels[y][x];
-                if(OUTPUT_Z_BUFFER){
-                    double color = (fabs(offsetPixel.zbuffer)-zBuffer_min)/zBuffer_max;
-
-                    output[y][x][0] = Color::Convert(color);
-                    output[y][x][1] = Color::Convert(color);
-                    output[y][x][2] = Color::Convert(color);
-                } else {
-                    Color color(offsetPixel.color);
-
-                    output[y][x][0] = color.R;
-                    output[y][x][1] = color.G;
-                    output[y][x][2] = color.B;
-                }
-            }
-        }
-
-        //Given by prompt
-        //Open file
-        FILE *f = fopen(outputFile.c_str(),"wb");
-        //Print information for ppm file
-        fprintf(f, "P6\n%d %d\n%d\n", view->width(), view->height(), 255);
-        //Write the pixel data to the file
-        fwrite(output, 1, view->height()*view->width()*3, f);
-        //Close the file
-        fclose(f);
-    }
+    /**
+     * Rasterization Stage
+     * @param actors Actors to raster
+     * @return
+     */
+    fragmentRaster Rasterization(std::vector<Actor*> &actors);
+
+
+    /**
+     * Phong lighting model pg.238 FcOG 10.8
+     * @param view Camera details
+     * @param lights All lights in scene
+     * @param fragment Fragment to be shaded
+     * @param color Output color reference
+     */
+    void PhongShading(ViewDetails *view, const std::vector<Light> *lights, Fragment &fragment, Eigen::Vector3d &color) const;
+
+    /**
+     * Lambertian lighting model pg.234 FcOG 10.1
+     * @param view Camera details
+     * @param lights All lights in scene
+     * @param fragment Fragment to be shaded
+     * @param color Output color reference
+     */
+    void LambertShading(ViewDetails *view, const std::vector<Light> *lights, Fragment &fragment, Eigen::Vector3d &color) const;
+
+    /**
+     * Flat lighting model
+     * @param view Camera details
+     * @param lights All lights in scene
+     * @param fragment Fragment to be shaded
+     * @param color Output color reference
+     */
+    void FlatShading(ViewDetails *view, const std::vector<Light> *lights, Fragment &fragment, Eigen::Vector3d &color) const;
+
+    /**
+     * No lighting model
+     * @param view Camera details
+     * @param lights All lights in scene
+     * @param fragment Fragment to be shaded
+     * @param color Output color reference
+     */
+    void NoShading(Fragment &fragment, Eigen::Vector3d &color) const;
+
+    /**
+     * Fragment Processing
+     * @param fragments Vector of fragments
+     * @return
+     */
+    fragmentRaster FragmentProcessing(fragmentRaster &fragments);
+
+    /**
+     * Blending
+     * @param fragments
+     * @return
+     */
+    raster Blending(fragmentRaster &fragments);
+
+    /**
+     * Save raster to output file in ppm format
+     * @param outputFile
+     * @param pixels
+     */
+    void Save(std::string outputFile, raster &pixels);
 };
-
 
 #endif //ROOTPROJ_PIPELINE_H

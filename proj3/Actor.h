@@ -14,31 +14,9 @@
 #include <Eigen/Dense>
 
 #include "Material.h"
+#include "Vertex.h"
 
-class Ray;
 class World;
-
-/**
- * vertex
- * point in space
- */
-class vertex {
-public:
-    vertex():camera_pos(NULL){}
-    virtual ~vertex(){}
-
-    //3D point in space
-    Eigen::Vector3d pos;
-
-    //3D point in space
-    Eigen::Vector4d *camera_pos;
-    //Tangent and bitangent of this point
-    double tangent, bitangent;
-
-    vertex(const Eigen::Vector3d &vec){
-        pos = vec;
-    }
-};
 
 class Actor {
 public:
