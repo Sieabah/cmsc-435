@@ -418,6 +418,10 @@ fragmentRaster Pipeline::Rasterization(std::vector<Actor *> &actors) {
 
                 //Is point in triangle?
                 if(alpha > 0 && beta > 0 && gamma > 0) {
+                    Eigen::Vector3d &A = verts[0].pos;
+                    Eigen::Vector3d &B = verts[1].pos;
+                    Eigen::Vector3d &C = verts[2].pos;
+
                     //Create fragment
                     Fragment fragment = Fragment();
                     fragment.zbuffer = zValues[0] * alpha + zValues[1] * beta + zValues[2] * gamma;
@@ -427,6 +431,7 @@ fragmentRaster Pipeline::Rasterization(std::vector<Actor *> &actors) {
                     fragment.verts = verts;
                     fragment.color = actor->Texture().color;
                     fragment.material = actor->Texture();
+                    fragment.normal = (B-A).cross(C-A).normalized();
 
                     //Save fragment on that point
                     fragments[y][x].push_back(fragment);
@@ -460,13 +465,8 @@ void Pipeline::PhongShading(ViewDetails *view, const std::vector<Light> *lights,
         return;
     }
 
-    //Setup points in triangle
-    Eigen::Vector3d &A = fragment.verts[0].pos;
-    Eigen::Vector3d &B = fragment.verts[1].pos;
-    Eigen::Vector3d &C = fragment.verts[2].pos;
-
-    //Get face normal
-    Eigen::Vector3d faceNormal = (B-A).cross(C-A).normalized();
+    //Get specific point in triangle
+    Eigen::Vector3d faceNormal = fragment.normal;
 
     //Get specific point in triangle
     Eigen::Vector3d point = fragment.verts[0].pos*fragment.alpha
@@ -523,13 +523,8 @@ void Pipeline::LambertShading(ViewDetails *view, const std::vector<Light> *light
         return;
     }
 
-    //Setup points on triangle
-    Eigen::Vector3d &A = fragment.verts[0].pos;
-    Eigen::Vector3d &B = fragment.verts[1].pos;
-    Eigen::Vector3d &C = fragment.verts[2].pos;
-
-    //Calculate face normal
-    Eigen::Vector3d normal = (B-A).cross(C-A).normalized();
+    //Get face normal
+    Eigen::Vector3d &normal = fragment.normal;
 
     //Calculate specific point on triangle
     Eigen::Vector3d point = fragment.verts[0].pos*fragment.alpha
@@ -570,13 +565,8 @@ void Pipeline::FlatShading(ViewDetails *view, const std::vector<Light> *lights, 
         return;
     }
 
-    //Setup points on triangle
-    Eigen::Vector3d &A = fragment.verts[0].pos;
-    Eigen::Vector3d &B = fragment.verts[1].pos;
-    Eigen::Vector3d &C = fragment.verts[2].pos;
-
-    //Calculate face normal
-    Eigen::Vector3d normal = (B-A).cross(C-A).normalized();
+    //Get face normal
+    Eigen::Vector3d &normal = fragment.normal;
 
     //Get position on face
     Eigen::Vector3d facePosition(fragment.verts[0].pos);

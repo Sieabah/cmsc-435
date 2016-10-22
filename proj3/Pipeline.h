@@ -27,6 +27,7 @@ struct Fragment{
         zbuffer = 0;
     }
 
+    Eigen::Vector3d normal;
     Eigen::Vector3d color;
     Material material;
 
