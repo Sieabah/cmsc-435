@@ -466,7 +466,13 @@ void Pipeline::PhongShading(ViewDetails *view, const std::vector<Light> *lights,
     }
 
     //Get specific point in triangle
-    Eigen::Vector3d faceNormal = fragment.normal;
+    Eigen::Vector3d &normal = fragment.normal;
+
+    if(fragment.verts[0].bNormals && fragment.verts[1].bNormals && fragment.verts[2].bNormals){
+        normal = fragment.verts[0].normal*fragment.alpha
+                + fragment.verts[1].normal*fragment.beta
+                + fragment.verts[2].normal*fragment.gamma;
+    }
 
     //Get specific point in triangle
     Eigen::Vector3d point = fragment.verts[0].pos*fragment.alpha
@@ -488,13 +494,13 @@ void Pipeline::PhongShading(ViewDetails *view, const std::vector<Light> *lights,
         Eigen::Vector3d h = (view->eye()+lightDir).normalized();
 
         //Calculate phongHighlight
-        double phongHighlight = intensity*pow(h.dot(faceNormal), fragment.material.shader.Shine);
+        double phongHighlight = intensity*pow(h.dot(normal), fragment.material.shader.Shine);
 
         //Calculate specular amount
         double specular = fragment.material.shader.Ks * phongHighlight;
 
         //Diffuse color
-        Eigen::Vector3d tmpColor = diffuse * (intensity * std::max(0.0, faceNormal.dot(lightDir)));
+        Eigen::Vector3d tmpColor = diffuse * (intensity * std::max(0.0, normal.dot(lightDir)));
 
         //Add highlights
         tmpColor += Eigen::Vector3d(specular, specular, specular);
@@ -523,8 +529,14 @@ void Pipeline::LambertShading(ViewDetails *view, const std::vector<Light> *light
         return;
     }
 
-    //Get face normal
+    //Get specific point in triangle
     Eigen::Vector3d &normal = fragment.normal;
+
+    if(fragment.verts[0].bNormals && fragment.verts[1].bNormals && fragment.verts[2].bNormals){
+        normal = fragment.verts[0].normal*fragment.alpha
+                     + fragment.verts[1].normal*fragment.beta
+                     + fragment.verts[2].normal*fragment.gamma;
+    }
 
     //Calculate specific point on triangle
     Eigen::Vector3d point = fragment.verts[0].pos*fragment.alpha

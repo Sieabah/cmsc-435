@@ -198,8 +198,38 @@ bool World::GenerateWorldFromNFF(std::string filepath, World &world)
 
                 std::vector<Polygon*> polys;
 
-                //Generate only triangle polygons
-                polys = generatePolys(file, line, count);
+                //Polygon patch
+                if(line[1] == 'p'){
+                    Polygon *poly = new Polygon();
+
+                    //For all vertices
+                    for (int j = 0; j < 3; ++j) {
+                        //Holder variables
+                        getline(file, line);
+                        std::istringstream coords(line);
+
+                        double X,Y,Z, n1, n2, n3;
+
+                        //Create coordinate and read from line
+                        coords >> X;
+                        coords >> Y;
+                        coords >> Z;
+
+                        //Create coordinate and read from line
+                        coords >> n1;
+                        coords >> n2;
+                        coords >> n3;
+
+                        //Add vertex to polygon
+                        poly->addVert(Eigen::Vector3d(X, Y, Z), Eigen::Vector3d(n1, n2, n3));
+
+                    }
+                    polys.push_back(poly);
+                } else {
+                    //Generate only triangle polygons
+                    polys = generatePolys(file, line, count);
+                }
+
 
                 //Finalize polygons
                 for(std::vector<Polygon*>::iterator it = polys.begin(); it < polys.end(); it++){

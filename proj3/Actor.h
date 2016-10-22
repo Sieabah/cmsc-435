@@ -30,6 +30,14 @@ public:
     }
 
     /**
+     * addVert
+     * Add vertex to polygon with normals
+     */
+    void addVert(Eigen::Vector3d coord, Eigen::Vector3d normals) {
+        vertices.push_back(vertex(coord, normals));
+    }
+
+    /**
      * Actor
      * Default constructor
      */
