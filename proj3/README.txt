@@ -19,6 +19,7 @@ pipeline.out <input nff> <output.ppm>
 Notes:
 You can change running conditions in main.cpp by changing the constants passed into the pipeline.
 
+TRANSPARENCY_ALPHA if set to < 1 will put the pipeline into transparency mode and emit transparent items
 OUTPUT_ZBUFFER will output a zbuffer render of the image, white being closer and black being furthest, misses are solid white.
 DEBUG will output all debug information to the console
 CULLING_ENABLED will cull backfacing triangles

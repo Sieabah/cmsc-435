@@ -19,6 +19,7 @@ const bool OUTPUT_ZBUFFER = false;
 const bool DEBUG = false;
 const bool CULLING_ENABLED = false;
 const LIGHTING LIGHTING_MODEL = PHONG;
+const double TRANSPARENCY_ALPHA = 1;
 
 /**
  * Checks for file existence
@@ -52,7 +53,7 @@ int main(int argc, char *argv[]) {
     };
 
     //Setup pipeline
-    Pipeline pipeline(&world, LIGHTING_MODEL, DEBUG, OUTPUT_ZBUFFER, CULLING_ENABLED);
+    Pipeline pipeline(&world, TRANSPARENCY_ALPHA, LIGHTING_MODEL, DEBUG, OUTPUT_ZBUFFER, CULLING_ENABLED);
 
     //Run
     pipeline.run(argv[2]);

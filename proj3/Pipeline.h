@@ -27,6 +27,19 @@ struct Fragment{
         zbuffer = 0;
     }
 
+    Fragment(const Fragment &other){
+        alpha = other.alpha;
+        beta = other.beta;
+        gamma = other.gamma;
+        zbuffer = other.zbuffer;
+
+        normal = other.normal;
+        color = other.color;
+        material = other.material;
+
+        verts = other.verts;
+    }
+
     Eigen::Vector3d normal;
     Eigen::Vector3d color;
     Material material;
@@ -37,6 +50,10 @@ struct Fragment{
 
     std::vector<vertex> verts;
     double zbuffer;
+
+    bool operator<(const Fragment &oth) const{
+        return zbuffer > oth.zbuffer;
+    }
 };
 
 /**
@@ -97,6 +114,8 @@ private:
      */
     const bool CULL_ENABLED;
 
+    const double ALPHA;
+
     /**
      * Lighting model, NONE|FLAT|LAMBERT|PHONG
      */
@@ -155,7 +174,7 @@ public:
      * @param culling Culling enabled
      * @return
      */
-    Pipeline(World *world, LIGHTING lighting = FLAT, bool debug=false,
+    Pipeline(World *world, double alpha = 1, LIGHTING lighting = FLAT, bool debug=false,
              bool zBuffer=false, bool culling=false);
 
     /**

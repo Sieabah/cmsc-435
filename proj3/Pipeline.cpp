@@ -162,9 +162,9 @@ void Pipeline::GenerateMMatrix() {
  * @param culling Culling enabled
  * @return
  */
-Pipeline::Pipeline(World *world, LIGHTING lighting, bool debug,
+Pipeline::Pipeline(World *world, double alpha, LIGHTING lighting, bool debug,
                    bool zBuffer, bool culling)
-        : m_world(world), DEBUG_OUTPUT(debug), OUTPUT_Z_BUFFER(zBuffer),
+        : m_world(world), ALPHA(alpha), DEBUG_OUTPUT(debug), OUTPUT_Z_BUFFER(zBuffer),
           CULL_ENABLED(culling), LIGHTING_TYPE(lighting){
 
     if(DEBUG_OUTPUT) {
@@ -493,8 +493,13 @@ void Pipeline::PhongShading(ViewDetails *view, const std::vector<Light> *lights,
         //Calculate vector halfway between lightDir and Eye
         Eigen::Vector3d h = (view->eye()+lightDir).normalized();
 
+        double h_normal = h.dot(normal);
+
+        double phongHighlight = 0;
+
         //Calculate phongHighlight
-        double phongHighlight = intensity*pow(h.dot(normal), fragment.material.shader.Shine);
+        if(h_normal > 0)
+            phongHighlight = intensity*pow(h_normal, fragment.material.shader.Shine);
 
         //Calculate specular amount
         double specular = fragment.material.shader.Ks * phongHighlight;
@@ -672,16 +677,24 @@ raster Pipeline::Blending(fragmentRaster &fragments) {
         for(int x = 0; x < view->width(); x++) {
             //Set default zbuffer to far plane
             Raster[y][x].zbuffer = view->farPlane();
+            Raster[y][x].color = view->background();
 
             //If there are no fragments background color is used
             if(fragments[y][x].size() == 0){
-                Raster[y][x].color = view->background();
+                continue;
             } else {
-                //Foor all fragments at this point
-                for(std::vector<Fragment>::iterator fragment = fragments[y][x].begin(); fragment < fragments[y][x].end(); fragment++){
-                    //Get top-most zbuffer
-                    if(fragment->zbuffer < Raster[y][x].zbuffer)
-                        Raster[y][x] = *fragment;
+                std::sort(fragments[y][x].begin(), fragments[y][x].end());
+
+                if(ALPHA < 1){
+                    double alpha = ALPHA, oldPixels = (1.0 - ALPHA);
+
+                    for (std::vector<Fragment>::iterator fragment = fragments[y][x].begin();
+                         fragment < fragments[y][x].end(); fragment++) {
+                        Raster[y][x].color = Eigen::Vector3d(fragment->color * alpha)
+                                             + Eigen::Vector3d(Raster[y][x].color * oldPixels);
+                    }
+                } else {
+                    Raster[y][x] = fragments[y][x].back();
                 }
             }
         }

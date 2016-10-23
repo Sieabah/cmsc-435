@@ -11,6 +11,7 @@
 #define ROOTPROJ_VERTEX_H_H
 
 #include <Eigen/Dense>
+#include <iostream>
 
 /**
  * vertex
@@ -18,7 +19,13 @@
  */
 class vertex {
 public:
-    vertex():camera_pos(NULL){
+    vertex(const vertex &other){
+        bNormals = other.bNormals;
+        camera_pos = other.camera_pos;
+        normal = Eigen::Vector3d(other.normal(0), other.normal(1), other.normal(2));
+        pos = Eigen::Vector3d(other.pos(0), other.pos(1), other.pos(2));
+        tangent = other.tangent;
+        bitangent = other.bitangent;
     }
     virtual ~vertex(){}
 
