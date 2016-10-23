@@ -482,10 +482,11 @@ void Pipeline::PhongShading(ViewDetails *view, const std::vector<Light> *lights,
     //Get diffuse color
     Eigen::Vector3d diffuse = fragment.material.color * fragment.material.shader.Kd;
 
+    //Get light intensity
+    double intensity = light->intensity()/sqrt(lights->size());
+
     //For all lights in scene
     for(std::vector<Light>::const_iterator light = lights->begin(); light < lights->end(); light++){
-        //Get light intensity
-        double intensity = light->intensity()/sqrt(lights->size());
 
         //Calculate direction to light form point
         Eigen::Vector3d lightDir = (light->position() - point).normalized();
@@ -494,7 +495,6 @@ void Pipeline::PhongShading(ViewDetails *view, const std::vector<Light> *lights,
         Eigen::Vector3d h = (view->eye()+lightDir).normalized();
 
         double h_normal = h.dot(normal);
-
         double phongHighlight = 0;
 
         //Calculate phongHighlight
