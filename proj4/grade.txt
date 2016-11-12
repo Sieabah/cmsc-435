@@ -23,7 +23,7 @@
   +------------------------------------------------------+
   |___     20%          Time Integration                 |
   |       ___     15%   Correct time integration         |
-  |       ___     10%   Correct iteration                |
+  |       ___      5%   Correct iteration                |
   +------------------------------------------------------+
   |___     20%          Implicit Integration (634)       |
   |___     10%          (Ex) Cotangent Weights           |

@@ -1,21 +1,23 @@
   +------------------------------------------------------+
-  |___     10%          README comment or file           |
+  |___     15%          README comment or file           |
   |       ___      1%   Submitted a readme file          |
-  |       ___      5%   Description of assignment        |
+  |       ___      3%   Description of assignment        |
   |       ___      2%   Clean submission(no .o .d files) |
   |       ___      2%   Statement of help                |
+  |       ___      5%   Code Comments                    |
+  |       ___      2%   Regular commits and log entries  |
   +------------------------------------------------------+
   |___     15%          Implementation                   |
   |       ___     10%   Compiles and executes w/o errors |
   |       ___      5%   Written in C++ with OpenGL       |
   +------------------------------------------------------+
+  |___     15%		File I/O                         |
+  |	   ___	  10%	Correctly parses input file      |
+  |        ___     5%   Produces valid output file       |
+  +------------------------------------------------------+
   |___     10%          Motion                           |
   |       ___      5%   Boids are constrained to a box   |
   |       ___      5%   Realistic boids movement         |
-  +------------------------------------------------------+
-  |___     20%		File I/O                         |
-  |	   ___	  10%	Correctly parses input file      |
-  |        ___    10%   Produces valid output file       |
   +------------------------------------------------------+
   |___     15%		Collision Avoidance		 |
   +------------------------------------------------------+
