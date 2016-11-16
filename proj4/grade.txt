@@ -21,7 +21,7 @@
   |       ___     10%   Avoids Vertex-Neighbor Tables or |
   |                     is a parallel implementation     |
   +------------------------------------------------------+
-  |___     20%          Time Integration                 |
+  |___     25%          Time Integration                 |
   |       ___     15%   Correct time integration         |
   |       ___     10%   Correct iteration                |
   +------------------------------------------------------+
