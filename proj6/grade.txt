@@ -12,7 +12,7 @@
   |       ___      5%   Written in C++                   |
   +------------------------------------------------------+
   |___     15%          Input/output                     |
-  |       ___      5%   Takes input image				     |
+  |       ___      5%   Takes input image		 |
   |       ___      5%   Outputs carved image             |
   |       ___      5%   Output image has desired size    |
   +------------------------------------------------------+
@@ -26,5 +26,5 @@
   |___     10%          (Ex) Compute energy once         |
   |___     10%          (Ex) Webpage with your results   |  
   +------------------------------------------------------+
-  |      Total          (of 100/435 or 110/634)          |
+  |_0_   Total          (of 100/435 or 110/634)          |	No Submission
   +------------------------------------------------------+
