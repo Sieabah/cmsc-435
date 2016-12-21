@@ -1,29 +1,30 @@
   +------------------------------------------------------+
-  |_10     10%          README comment or file           |
-  |       __1      1%   Submitted a readme file          |
-  |       __5      5%   Description of assignment        |
-  |       __2      2%   Clean submission(no .o .d files) |
-  |       __2      2%   Statement of help                |
+  |_15     15%          README comment or file           |
+  |       _1_      1%   Submitted a readme file          |
+  |       _3_      3%   Description of assignment        |
+  |       _2_      2%   Clean submission(no .o .d files) |
+  |       _2_      2%   Statement of help                |
+  |       _5_      5%   Code Comments                    |
+  |       _2_      2%   Regular commits and log entries  |
   +------------------------------------------------------+
   |_15     15%          Implementation                   |
   |       _10     10%   Compiles and executes w/o errors |
-  |       __5      5%   Written in C++                   |
+  |       _5_      5%   Written in C++                   |
   +------------------------------------------------------+
   |_15     15%          Input/output                     |
-  |       __5      5%   Takes input image			     |
-  |       __5      5%   Outputs carved image             |
-  |       __5      5%   Output image has desired size    |
+  |       _5_      5%   Takes input image		 |
+  |       _5_      5%   Outputs carved image             |
+  |       _5_      5%   Output image has desired size    |
   +------------------------------------------------------+
-  |_30     30%   		Energy function                  |
+  |_25     25%		Energy function			 |
   +------------------------------------------------------+
-  |_30     30%   		Carving in horizontal and/or     |
-  |                     vertical direction removing 	 |
-  |						lowest-importance seam           |  
+  |_30     30%		Carving in horizontal and/or     |
+  |                     vertical direction removing      |
+  |			lowest-energy seam               |  
   +------------------------------------------------------+
-  |__0     10%          (634) Scharr gradient operator   |
-  |__0     10%          (Ex) Compute energy once         |
+  |_NA     10%          (634) Scharr gradient operator   |
+  |_0_     10%          (Ex) Compute energy once         |
   |_10     10%          (Ex) Webpage with your results   |  
   +------------------------------------------------------+
   |110   Total          (of 100/435 or 110/634)          |
   +------------------------------------------------------+
-  God job.
